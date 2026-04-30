@@ -13,7 +13,9 @@
       "Bash(npm view *)",
       "WebFetch(domain:www.npmjs.com)",
       "Bash(npx tsc *)",
-      "Bash(npx eslint *)"
+      "Bash(npx eslint *)",
+      "Bash(node -e \"console.log\\(require\\('sharp'\\).versions\\)\")",
+      "Bash(node -e ' *)"
     ]
   }
 }

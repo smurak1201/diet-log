@@ -4,7 +4,9 @@
       "Bash(curl -sS http://localhost:3000/)",
       "Bash(curl -sS \"http://localhost:3000/_next/static/chunks/%5Broot-of-the-server%5D__0~v83vv._.css\")",
       "Read(//tmp/**)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(git commit --amend -m ' *)",
+      "Bash(git reset *)"
     ]
   }
 }

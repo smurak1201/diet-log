@@ -44,9 +44,10 @@ https://design.digital.go.jp/dads/foundations/
 - タブ追加・変更は [components/tabs.ts](components/tabs.ts) の `TABS` 定数のみで行う (URL / ラベル / アイコンを一元管理)
 
 ## クラス名の組み立て (Tailwind)
-- `clsx` を採用 (`tailwind-merge` / shadcn CLI は不採用 — DADS と衝突するため)
-- **使うとき**: 条件分岐 (`isActive ? ... : ...`) / 役割ごとに行を分けたい長い className
-- **使わないとき**: 1 行で読める短い className → そのまま文字列で書く (`clsx()` で包むのは冗長)
+- **`cn()` ヘルパーを使う** ([lib/cn.ts](lib/cn.ts) — `clsx` + `tailwind-merge` をラップ)。`clsx` / `twMerge` を直接 import しない (mixing 防止)
+- shadcn CLI は不採用 (DADS と衝突するため)。`cn()` パターンだけを取り入れている
+- **使うとき**: 条件分岐 (`isActive ? ... : ...`) / 役割ごとに行を分けたい長い className / 外部から `className` prop を受ける再利用部品
+- **使わないとき**: 1 行で読める短い className → そのまま文字列で書く (`cn()` で包むのは冗長)
 - 任意値構文 `[...]` より組み込みスケールを優先 (例: `outline-offset-[-2px]` ❌ / `-outline-offset-2` ✅)。`env()` / `calc()` など組み込みで表現できない値だけ `[...]` を使う
 
 ## React / Next.js コーディング規約 (Next 16 + React 19)

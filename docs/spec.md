@@ -26,3 +26,22 @@
   - DB 制約: `date` に `@unique`
   - 実装: `prisma.bodyComposition.upsert({ where: { date }, update: {...}, create: { date, ...} })`
 - 粒度は日付 (`@db.Date`)。時刻情報は持たない
+
+---
+
+## 画面構成
+
+下部タブで以下 4 画面を切り替える (URL は分離)。
+
+| URL | 画面 | 概要 |
+| --- | --- | --- |
+| `/` | ホーム | アプリトップ |
+| `/workout` | 運動記録 | 運動記録の一覧 |
+| `/body` | 体組成 | 体組成記録の一覧 |
+| `/entry` | データ登録 | 運動・体組成の入力フォーム入口 |
+
+## 起動形態
+
+- **iPhone のホーム画面に追加して PWA として起動する前提**で設計する (ブラウザでも動くが、UX はホーム画面アプリ起動時を主軸に最適化)
+- スタンドアロン表示 (`apple-mobile-web-app-capable`) のため Safari の UI (アドレスバー / 更新ボタン) は出ない。再読込が必要な操作は Server Action + `revalidatePath` で吸収する設計にする
+- ホームインジケータ領域は `viewportFit: "cover"` + `env(safe-area-inset-bottom)` で回避済み

@@ -35,6 +35,20 @@ https://design.digital.go.jp/dads/foundations/
   - スキップリンク必須、フォーカスリング非削除
   - テキストコントラスト 4.5:1、UI 3:1
 
+## レイアウト構造 (下部タブ前提)
+画面構成・URL 対応・PWA 前提は [docs/spec.md](docs/spec.md) を参照。実装側のルール:
+
+- **下部タブナビは root layout に固定配置** ([components/bottom-tab-nav.tsx](components/bottom-tab-nav.tsx))。**各ページに `<footer>` を置かない** (タブバーに被る)
+- `<body>` の `pb-[calc(4rem+env(safe-area-inset-bottom))]` はタブバー + iOS ホームインジケータ分の余白。**消さない**
+- スキップリンクの遷移先 `id="main"` は**各ページの `<main>` に付ける** (layout 側に置くと `<main>` が重複する)
+- タブ追加・変更は [components/tabs.ts](components/tabs.ts) の `TABS` 定数のみで行う (URL / ラベル / アイコンを一元管理)
+
+## クラス名の組み立て (Tailwind)
+- `clsx` を採用 (`tailwind-merge` / shadcn CLI は不採用 — DADS と衝突するため)
+- **使うとき**: 条件分岐 (`isActive ? ... : ...`) / 役割ごとに行を分けたい長い className
+- **使わないとき**: 1 行で読める短い className → そのまま文字列で書く (`clsx()` で包むのは冗長)
+- 任意値構文 `[...]` より組み込みスケールを優先 (例: `outline-offset-[-2px]` ❌ / `-outline-offset-2` ✅)。`env()` / `calc()` など組み込みで表現できない値だけ `[...]` を使う
+
 ## React / Next.js コーディング規約 (Next 16 + React 19)
 
 ### Server / Client コンポーネント

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Noto_Sans_JP } from "next/font/google";
+import { BottomTabNav } from "@/components/bottom-tab-nav";
 import "./globals.css";
 
 const notoSansJP = Noto_Sans_JP({
@@ -15,6 +16,11 @@ const notoSansJP = Noto_Sans_JP({
 export const metadata: Metadata = {
   title: "ダイエットログ",
   description: "運動記録と体組成を管理するアプリ",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "ダイエットログ",
+  },
 };
 
 export const viewport: Viewport = {
@@ -22,6 +28,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   themeColor: "#ffffff",
   colorScheme: "light",
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -38,7 +45,7 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap"
         />
       </head>
-      <body className="min-h-full flex flex-col font-sans bg-white text-solid-gray-900">
+      <body className="min-h-full flex flex-col font-sans bg-white text-solid-gray-900 pb-[calc(4rem+env(safe-area-inset-bottom))]">
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-3 focus:py-2 focus:bg-white focus:text-solid-gray-900 focus:outline-2 focus:outline-focus-blue"
@@ -46,6 +53,7 @@ export default function RootLayout({
           メインコンテンツへスキップ
         </a>
         {children}
+        <BottomTabNav />
       </body>
     </html>
   );

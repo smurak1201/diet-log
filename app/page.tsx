@@ -28,10 +28,6 @@ export default function Home() {
           </article>
         </section>
       </main>
-
-      <footer className="mx-auto w-full max-w-screen-sm px-4 py-6 text-dns-14N-130 text-solid-gray-700">
-        <span>diet-log</span>
-      </footer>
     </>
   );
 }

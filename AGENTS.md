@@ -35,3 +35,40 @@ https://design.digital.go.jp/dads/foundations/
   - スキップリンク必須、フォーカスリング非削除
   - テキストコントラスト 4.5:1、UI 3:1
 
+## React / Next.js コーディング規約 (Next 16 + React 19)
+
+### Server / Client コンポーネント
+- **Server Component がデフォルト**。`'use client'` は state / イベントハンドラ / ブラウザ API / lifecycle hook が必要なときのみ、最小範囲のリーフに付与する。page / layout 全体を Client 化しない。
+- データ取得は Server Component で `async/await` (DB / fetch 直接 OK)。**Client Component から直接 fetch しない** — Server で取って props で渡すか、Promise を渡して `use()` で stream する。
+- `params` / `searchParams` / `cookies()` / `headers()` は Next 16 で **完全 async**。必ず `await` する (型も `Promise<...>`)。
+- Context は Client Component。Provider は `children` をラップする形で**できるだけ深く**配置 (root layout 全体を Client 化しない)。
+- DB 接続や API キーを扱うモジュールには `import 'server-only'` を入れて Client にバンドルされないように boundary を強制。
+
+### データ変更は Server Actions
+- ミューテーションは Server Action (`'use server'`) を第一選択。Route Handler (`route.ts`) は外部 API / webhook / 専用 GET 用に限定。
+- **各 Action 冒頭で auth/authz を必ず検証** — Action は POST で直接叩ける。
+- 入力検証は **server 側で zod 等を使い必ず実行**。HTML の `required` / `type=email` は UX hint に過ぎない。
+- ミューテーション後はキャッシュ整合: `revalidateTag(tag, profile)` / `revalidatePath(path)` / `refresh()`。**Next 16 で `revalidateTag` は第2引数 (cacheLife profile) が必須**。
+- `redirect()` は `revalidatePath` / `revalidateTag` の**後**に呼ぶ (redirect 後は実行されない)。
+
+### フォーム
+- `<form action={serverAction}>` を基本形 (progressive enhancement で JS 無しでも動く)。
+- error / pending を扱うフォームは React 19 の `useActionState(action, initialState)`。
+- 子コンポーネントで pending を見るときは `useFormStatus()` (props バケツリレー不要)。
+- 楽観的更新は `useOptimistic`。
+- 複数引数を渡したいときは `action.bind(null, extraArg)` (隠し input より安全)。
+
+### React 19 の新パターン (旧 API は使わない)
+- **`forwardRef` は使わない** — `ref` は通常の prop として受け取る (`function Comp({ ref, ... })`)。
+- ref callback 内で setup → `return () => {...}` で cleanup を返す形にする。
+- 条件分岐の後で Promise を解決するときや Context を読むときは **`use()`** (旧 `useContext` は早期 return できない)。
+- ルート/ページの metadata は **Next.js の `export const metadata` / `viewport`** を使う。`<title>`/`<meta>` を component 内に直書きしない (Next の静的解析が効かなくなる)。
+
+### 避けるべきパターン
+- `useEffect` でデータ取得 → Server Component で fetch する
+- `useEffect` で派生 state を計算 → render 中に derive
+- 派生計算が重いだけのために `useMemo` を多用 → React Compiler に任せる前提でまずシンプルに書く
+- Client Component を不必要に大きくする → 葉に下げる、Server Component を `children` 経由で interleave する
+- Server↔Client 境界を跨ぐ props に関数やクラスを載せる → serializable な値だけ (Server Action は OK)
+
+

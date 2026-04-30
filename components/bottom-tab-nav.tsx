@@ -23,7 +23,7 @@ export function BottomTabNav() {
               <Link
                 href={tab.href}
                 aria-current={isActive ? "page" : undefined}
-                className={`flex min-h-16 flex-col items-center justify-center gap-1 px-2 py-2 ${colorClass} focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-focus-blue`}
+                className={`flex min-h-16 flex-col items-center justify-center gap-1 px-2 py-2 ${colorClass} focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus-blue`}
               >
                 <span className="material-symbols-outlined" aria-hidden="true">
                   {tab.icon}

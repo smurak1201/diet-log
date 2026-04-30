@@ -46,6 +46,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col font-sans bg-white text-solid-gray-900 pb-[calc(4rem+env(safe-area-inset-bottom))]">
+        {/* スキップリンク: キーボード操作時に最初の Tab で画面左上に出現し、ヘッダー/タブバーを飛ばして本文へ移動できる (WCAG 2.2 / JIS X 8341-3 対応)。普段は sr-only で非表示、フォーカス時のみ表示。 */}
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-3 focus:py-2 focus:bg-white focus:text-solid-gray-900 focus:outline-2 focus:outline-focus-blue"

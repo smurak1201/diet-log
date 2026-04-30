@@ -41,7 +41,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col font-sans bg-white text-solid-gray-900">
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-3 focus:py-2 focus:bg-white focus:text-solid-gray-900 focus:outline focus:outline-2 focus:outline-focus-blue"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-3 focus:py-2 focus:bg-white focus:text-solid-gray-900 focus:outline-2 focus:outline-focus-blue"
         >
           メインコンテンツへスキップ
         </a>

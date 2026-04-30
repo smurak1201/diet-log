@@ -6,9 +6,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Project: ダイエットログ (diet-log)
 
-## 記録対象データ
-- 運動: 日付 / 距離 / 平均ペース / 時間 / 消費カロリー / 平均心拍数
-- 体組成: 体重 / 体脂肪率 / 筋肉量 / 内臓脂肪 / 基礎代謝
+## アプリ仕様
+記録対象データ・データモデルの振る舞い (粒度 / 上書きルール 等) は [docs/spec.md](docs/spec.md) を参照。実装前に必ず確認すること。
 
 ## Stack
 - Next.js 16 App Router, React 19, TypeScript, Tailwind CSS v4 (CSS-first / `@plugin` 構文)
@@ -130,5 +129,3 @@ https://design.digital.go.jp/dads/foundations/
 - **`dangerouslySetInnerHTML` は原則禁止**。必要な場合は事前にサニタイズ
 - **環境変数**: `NEXT_PUBLIC_` プレフィックス付きは client bundle に出る — secret は付けない
 - **`alert()` / `confirm()` を使わない**: 通知は toast / `aria-live` リージョン、確認はモーダルで。toast ライブラリを採用したら本ファイルに追記する
-
-

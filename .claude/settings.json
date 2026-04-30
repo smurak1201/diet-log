@@ -16,7 +16,8 @@
       "Bash(npx eslint *)",
       "Bash(node -e \"console.log\\(require\\('sharp'\\).versions\\)\")",
       "Bash(node -e ' *)",
-      "Bash(curl -sL \"https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/fitness_tracker/default/24px.svg\")"
+      "Bash(curl -sL \"https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/fitness_tracker/default/24px.svg\")",
+      "Bash(yes)"
     ]
   }
 }

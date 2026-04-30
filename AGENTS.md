@@ -12,7 +12,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## Stack
 - Next.js 16 App Router, React 19, TypeScript, Tailwind CSS v4 (CSS-first / `@plugin` 構文)
-- 永続化: **Neon Postgres** (Vercel 経由)。接続情報は `.env` に配置済み。
+- 永続化: **Neon Postgres** (Vercel 経由) + **Prisma** (ORM, 導入予定)。接続情報は `.env` に配置済み。
 - デプロイ先: Vercel
 
 ## Design system — デジタル庁デザインシステム (DADS) を厳守
@@ -64,11 +64,70 @@ https://design.digital.go.jp/dads/foundations/
 - 条件分岐の後で Promise を解決するときや Context を読むときは **`use()`** (旧 `useContext` は早期 return できない)。
 - ルート/ページの metadata は **Next.js の `export const metadata` / `viewport`** を使う。`<title>`/`<meta>` を component 内に直書きしない (Next の静的解析が効かなくなる)。
 
+### パフォーマンス
+- 独立した非同期処理は `Promise.all()` / `Promise.allSettled()` で並列化する (直列 `await` を連発しない)
+- 重いコンポーネントは `next/dynamic` で動的インポートして初期 bundle を削る
+- `useMemo` / `useCallback` の濫用は避ける — まずシンプルに書き、必要になったら React Compiler に任せる
+
 ### 避けるべきパターン
 - `useEffect` でデータ取得 → Server Component で fetch する
 - `useEffect` で派生 state を計算 → render 中に derive
 - 派生計算が重いだけのために `useMemo` を多用 → React Compiler に任せる前提でまずシンプルに書く
 - Client Component を不必要に大きくする → 葉に下げる、Server Component を `children` 経由で interleave する
 - Server↔Client 境界を跨ぐ props に関数やクラスを載せる → serializable な値だけ (Server Action は OK)
+
+## 開発の基本原則
+- **言語**: 出力 / コメント / コミットメッセージは日本語で書く
+- **修正範囲**: 依頼された箇所以外は原則変更しない (関連で必要なら提案する)
+- **未使用コードを残さない**: 未使用 import / 未使用変数 / 動かない仮置きのコードは削除
+- **YAGNI**: 「今」必要な機能だけ実装。将来用の API は書かない
+- **KISS**: 最もシンプルな解を選ぶ
+- **DRY**: 3 箇所目で共通化を検討。形が似ているだけのロジックは無理に共通化しない
+- **単一責任**: 関数 / コンポーネントは 1 つの責務に絞る
+- **型**: 引数・返り値に型を付ける。`any` は使わない
+- **マジックナンバー / ハードコード禁止**: 数値・文字列は定数として一元管理
+- **命名**: カスタムフックは `use` prefix (`useFoo`)、イベントハンドラは `handle` prefix (`handleSubmit`)
+
+## コメント規則
+**基本: コードだけで意図が明確なら、コメントは書かない**
+
+書くべきケース:
+1. **初心者にわかりにくい実装** — CSS の特殊挙動 (`position:fixed` の副作用 等) / ライブラリ特有の使い方 / 複雑なアルゴリズム
+2. **このアプリ特有の設計判断** — なぜそれを選んだか / トレードオフ / ビジネスロジック上の理由
+
+書かないケース:
+- 関数名・変数名から役割が明確 (`<Header />`, `<Footer />` 等)
+- 標準的な React / Next.js / Tailwind パターン
+- 単に「what」を繰り返すだけのコメント
+
+形式:
+- 日本語で**簡潔に**。長い説明が要るならまずコードを改善する
+- ファイル先頭は 1〜2 行の要約のみ。冗長な箇条書きは置かない
+
+## Prisma (DB 操作)
+- **DB 操作は薄いラッパー経由で実行**: `lib/db.ts` 等にエラーハンドリング・ログを統一する関数 (例: `safeDb`) を置き、Prisma を直叩きする箇所を最小化する。Prisma エラーを user-friendly メッセージに変換する役割も持たせる
+- **トランザクション**: 複数レコードの更新で一貫性が必要なら `prisma.$transaction(...)` を使う。トランザクション内の操作は最小限に抑える (ロック範囲を狭く保つ)
+- **N+1 を避ける**: 関連データは `include` / `select` で事前取得。ループ内で個別クエリを発行しない
+- **マイグレーション**: スキーマ変更は `prisma migrate dev` で管理。`prisma/schema.prisma` を single source of truth とする
+- **型**: Prisma が生成する型 (`Prisma.UserCreateInput` 等) を活用し、独自に再定義しない
+- **DB 接続を扱うモジュール**には `import 'server-only'` を必ず入れて Client にバンドルされないようにする
+
+## アクセシビリティ実装パターン
+(「UX 制約」の具体実装ルール)
+
+- **セマンティック HTML**: `<header>`, `<main>`, `<nav>`, `<section>`, `<article>`, `<dl>` 等、内容に合うタグを選ぶ。`<div>` の濫用を避ける
+- **aria 属性**:
+  - アイコンのみのボタンは `aria-label` 必須
+  - トグル状態は `aria-pressed`
+  - 関連ボタン群は `<div role="group" aria-label="...">` で意味を明示
+- **フォーカスリング**: カスタムボタン / リンクには `focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-blue` を付ける (DADS の `focus-blue` を outline に使う)
+- **タッチターゲット**: 最低 44 × 44px (`min-h-11 min-w-11` 目安)
+- **ライブリージョン**: フォームエラー / 動的な通知は `aria-live="polite"` を付けて読み上げさせる
+
+## その他
+- **画像**: `next/image` を使う (自動最適化 / 遅延読み込み / レスポンシブ)
+- **`dangerouslySetInnerHTML` は原則禁止**。必要な場合は事前にサニタイズ
+- **環境変数**: `NEXT_PUBLIC_` プレフィックス付きは client bundle に出る — secret は付けない
+- **`alert()` / `confirm()` を使わない**: 通知は toast / `aria-live` リージョン、確認はモーダルで。toast ライブラリを採用したら本ファイルに追記する
 
 

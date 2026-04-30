@@ -1,0 +1,67 @@
+// ダイエットログ DB スキーマ
+// Neon Postgres (Vercel) + Prisma 7
+//
+// コメント記法について:
+//   `///` (triple-slash) は Prisma の docstring で、生成される TypeScript 型に
+//   JSDoc として埋め込まれる。エディタ補完時にツールチップで表示されるため、
+//   model / field の説明には `///` を使う。
+//   `//` (double-slash) は schema 内だけのメモで、生成物には残らない。
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+// 接続 URL は Prisma 7 で schema から廃止された
+// migrate 用 URL は prisma.config.ts、runtime URL は Neon adapter (lib/db.ts) で指定する
+datasource db {
+  provider = "postgresql"
+}
+
+/// 運動記録 (ラン等)
+model Workout {
+  /// レコード ID
+  id           String   @id @default(cuid())
+  /// 運動した日付
+  date         DateTime @db.Date
+  /// 距離 (km)
+  distanceKm   Float
+  /// 平均ペース (秒/km)
+  paceSecPerKm Int
+  /// 運動時間 (秒)
+  durationSec  Int
+  /// 消費カロリー (kcal)
+  calories     Int
+  /// 平均心拍数 (bpm)
+  avgHeartRate Int
+  /// 作成日時
+  createdAt    DateTime @default(now())
+  /// 更新日時
+  updatedAt    DateTime @updatedAt
+
+  @@index([date])
+}
+
+/// 体組成記録
+model BodyComposition {
+  /// レコード ID
+  id              String   @id @default(cuid())
+  /// 計測した日付
+  date            DateTime @db.Date
+  /// 体重 (kg)
+  weightKg        Float
+  /// 体脂肪率 (%)
+  bodyFatPct      Float
+  /// 筋肉量 (kg)
+  muscleMassKg    Float
+  /// 内臓脂肪レベル
+  visceralFat     Float
+  /// 基礎代謝 (kcal)
+  basalMetabolism Int
+  /// 作成日時
+  createdAt       DateTime @default(now())
+  /// 更新日時
+  updatedAt       DateTime @updatedAt
+
+  @@index([date])
+}

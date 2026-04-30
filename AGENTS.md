@@ -20,7 +20,8 @@ https://design.digital.go.jp/dads/foundations/
 
 - パッケージ: `@digital-go-jp/design-tokens`, `@digital-go-jp/tailwind-theme-plugin`
 - フォント: Noto Sans JP (weight 400/700 のみ)。和文は OS フォールバック (`-apple-system, BlinkMacSystemFont, sans-serif`)。
-- アイコン: Material Symbols (Outlined) — Google Fonts CDN
+- アイコン: Material Symbols (Outlined) — Google Fonts CDN で root layout に読み込み済み。**他のアイコンライブラリは追加しない**。基本形: `<span className="material-symbols-outlined" aria-hidden="true">directions_walk</span>` (アイコン単独のボタンは `aria-label` 必須)
+  - 例外: ファビコン (`app/icon.svg`) はフォントが使えないので SVG パスを直接埋め込む
 - 配色: DADS トークンユーティリティのみ (例: `bg-white`, `text-solid-gray-900`, `border-solid-gray-200`, `bg-blue-800`, `bg-success-1`)。**生 hex 禁止**。**ダークモード無し** (DADS にダークトークンが存在しないため)。
 - タイポ: DADS タイポプリセット (例: `text-std-16N-170`, `text-std-24B-150`, `text-dns-14N-130`)。**14px 未満禁止**。
 - 角丸: `rounded-{4,6,8,12,16,24,32,full}` (DADS スケール)

@@ -10,6 +10,7 @@ import {
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { cn } from "@/lib/cn";
+import { formatDuration, formatPace } from "@/lib/format";
 import { createWorkout, recognizeWorkoutImage } from "./actions";
 
 // Server から返る認識結果の形 (lib/gemini.ts の RunRecognition と同形だが、Client にロードされないよう型をここに持つ)
@@ -329,22 +330,6 @@ function Field({
 function toDateTimeLocal(iso: string | null | undefined): string {
   if (!iso) return "";
   return iso.replace(/Z$/, "").replace(/([+-]\d{2}:?\d{2})$/, "").slice(0, 16);
-}
-
-function formatPace(sec: number): string {
-  const m = Math.floor(sec / 60);
-  const s = sec % 60;
-  return `${m}:${String(s).padStart(2, "0")}`;
-}
-
-function formatDuration(sec: number): string {
-  const h = Math.floor(sec / 3600);
-  const m = Math.floor((sec % 3600) / 60);
-  const s = sec % 60;
-  if (h > 0) {
-    return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-  }
-  return `${m}:${String(s).padStart(2, "0")}`;
 }
 
 // 長辺 1280px / JPEG 0.85 品質に縮小。Server Action のペイロードと Gemini のトークンを節約

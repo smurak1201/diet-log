@@ -128,9 +128,10 @@ function SubmitButton() {
       disabled={pending}
       aria-busy={pending}
       className={cn(
-        "col-span-2 min-h-11 rounded-8 bg-blue-800 px-4 text-std-16B-170 text-white",
+        "col-span-2 min-h-11 cursor-pointer rounded-8 bg-blue-800 px-4 text-std-16B-170 text-white",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-blue",
-        "disabled:opacity-60",
+        "transition-colors hover:bg-blue-900 active:bg-blue-900",
+        "disabled:cursor-not-allowed disabled:opacity-60",
       )}
     >
       {pending ? "登録中…" : "登録する"}

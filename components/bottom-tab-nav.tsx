@@ -30,6 +30,7 @@ export function BottomTabNav() {
                 className={cn(
                   "flex min-h-16 flex-col items-center justify-center gap-1 px-2 py-2",
                   "focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus-blue",
+                  "transition-colors active:bg-solid-gray-50",
                   isActive ? "text-blue-800" : "text-solid-gray-700",
                 )}
               >

@@ -1,60 +1,37 @@
 // ダッシュボード (/)
-// データ取得 → 集計 → 各セクションを縦に並べる Server Component
+// データ取得 → 各セクションを縦に並べる Server Component。
+// 期間切替が必要なカードには workout / body を全件 ISO 化して props で渡す。
 
 import type { Metadata } from "next";
+import { ActivityCard } from "@/components/dashboard/activity-card";
 import { BodyDiffCard } from "@/components/dashboard/body-diff-card";
-import {
-  ChartSection,
-} from "@/components/dashboard/chart-section";
-import { BodyChart, WorkoutChart } from "@/components/dashboard/charts";
+import { BodyTrendCard } from "@/components/dashboard/body-trend-card";
 import { StartDateForm } from "@/components/dashboard/start-date-form";
 import { StartDateSection } from "@/components/dashboard/start-date-section";
 import { StreakCard } from "@/components/dashboard/streak-card";
-import { SummaryCard } from "@/components/dashboard/summary-card";
+import type {
+  BodyPayload,
+  WorkoutPayload,
+} from "@/components/dashboard/types";
 import { prisma, safeDb } from "@/lib/db";
-import {
-  formatChartDate,
-  formatDate,
-  formatIsoDate,
-} from "@/lib/format";
+import { formatDate, formatIsoDate } from "@/lib/format";
 import { SETTING_KEYS } from "@/lib/settings";
-import {
-  calcBodyDiff,
-  calcStreak,
-  daysSince,
-  getMonthRange,
-  getWeekRange,
-  summarizeWorkouts,
-} from "@/lib/summary";
+import { calcBodyDiff, calcStreak, daysSince } from "@/lib/summary";
 
 export const metadata: Metadata = {
   title: "ダッシュボード | ダイエットログ",
 };
 
-const CHART_LOOKBACK_DAYS = 90;
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
-
 export default async function HomePage() {
   const today = new Date();
-  const lookbackFrom = new Date(
-    today.getTime() - CHART_LOOKBACK_DAYS * MS_PER_DAY,
-  );
 
   const [workoutResult, bodyResult, settingResult] = await Promise.all([
     safeDb(
-      () =>
-        prisma.workout.findMany({
-          where: { date: { gte: lookbackFrom } },
-          orderBy: { date: "asc" },
-        }),
+      () => prisma.workout.findMany({ orderBy: { date: "asc" } }),
       "dashboard.workout.findMany",
     ),
     safeDb(
-      () =>
-        prisma.bodyComposition.findMany({
-          where: { date: { gte: lookbackFrom } },
-          orderBy: { date: "asc" },
-        }),
+      () => prisma.bodyComposition.findMany({ orderBy: { date: "asc" } }),
       "dashboard.bodyComposition.findMany",
     ),
     safeDb(
@@ -66,11 +43,9 @@ export default async function HomePage() {
     ),
   ]);
 
-  const hasError =
-    !workoutResult.ok || !bodyResult.ok || !settingResult.ok;
+  const hasError = !workoutResult.ok || !bodyResult.ok || !settingResult.ok;
 
-  // 開始日が登録済みなら、開始日以降の最初の体組成と、最新の体組成を取得
-  // (90 日窓に開始日が含まれないケースに備え、専用クエリで取り直す)
+  // 開始日が登録済みなら、開始日以降の最初の体組成と最新の体組成を取得
   let startDate: Date | null = null;
   let initialBody:
     | { date: Date; weightKg: number; bodyFatPct: number }
@@ -105,41 +80,32 @@ export default async function HomePage() {
     if (latestResult.ok && latestResult.data) latestBody = latestResult.data;
   }
 
-  // 集計
   const todayIso = formatIsoDate(today);
   const startDateIso = startDate ? formatIsoDate(startDate) : "";
-  const weekRange = getWeekRange(today);
-  const monthRange = getMonthRange(today);
 
   const workouts = workoutResult.ok ? workoutResult.data : [];
   const bodies = bodyResult.ok ? bodyResult.data : [];
 
-  const weekSummary = summarizeWorkouts(workouts, weekRange);
-  const monthSummary = summarizeWorkouts(workouts, monthRange);
   const streak = calcStreak(workouts, today);
 
-  // 同じ日に複数回運動している場合は距離を合算してチャートのバーを 1 本にする
-  const workoutByDay = new Map<string, number>();
-  for (const w of workouts) {
-    const key = formatChartDate(w.date);
-    workoutByDay.set(key, (workoutByDay.get(key) ?? 0) + w.distanceKm);
-  }
-  const workoutChartData = Array.from(workoutByDay.entries()).map(
-    ([date, distanceKm]) => ({ date, distanceKm }),
-  );
-
-  const bodyChartData = bodies.map((b) => ({
-    date: formatChartDate(b.date),
+  // 期間切替カード用のシリアライズ済みデータ (date は ISO 文字列)
+  const workoutPayload: WorkoutPayload[] = workouts.map((w) => ({
+    id: w.id,
+    date: w.date.toISOString(),
+    distanceKm: w.distanceKm,
+    durationSec: w.durationSec,
+    calories: w.calories,
+  }));
+  const bodyPayload: BodyPayload[] = bodies.map((b) => ({
+    id: b.id,
+    date: b.date.toISOString(),
     weightKg: b.weightKg,
     bodyFatPct: b.bodyFatPct,
   }));
 
-  const weekRangeLabel = `${formatChartDate(weekRange.from)} - ${formatChartDate(
-    new Date(weekRange.to.getTime() - MS_PER_DAY),
-  )}`;
-  const monthRangeLabel = `${today.getUTCFullYear()}/${String(
-    today.getUTCMonth() + 1,
-  ).padStart(2, "0")}`;
+  // workouts / bodies は asc ソート済みなので先頭が最古
+  const oldestWorkoutIso = workouts[0]?.date.toISOString() ?? null;
+  const oldestBodyIso = bodies[0]?.date.toISOString() ?? null;
 
   // 進捗カード表示の分岐:
   // 1. 開始日 未登録 → StartDateSection
@@ -210,25 +176,6 @@ export default async function HomePage() {
           )}
         </section>
 
-        <section
-          aria-labelledby="summary-heading"
-          className="flex flex-col gap-4"
-        >
-          <h2 id="summary-heading" className="sr-only">
-            期間サマリー
-          </h2>
-          <SummaryCard
-            title="今週"
-            rangeLabel={weekRangeLabel}
-            summary={weekSummary}
-          />
-          <SummaryCard
-            title="今月"
-            rangeLabel={monthRangeLabel}
-            summary={monthSummary}
-          />
-        </section>
-
         <section aria-labelledby="streak-heading">
           <h2 id="streak-heading" className="sr-only">
             継続状況
@@ -236,32 +183,26 @@ export default async function HomePage() {
           <StreakCard streak={streak} />
         </section>
 
-        <section aria-labelledby="workout-chart-heading">
-          <h2 id="workout-chart-heading" className="sr-only">
-            運動グラフ
+        <section aria-labelledby="activity-heading">
+          <h2 id="activity-heading" className="sr-only">
+            運動
           </h2>
-          <ChartSection
-            title="運動 (直近 90 日)"
-            description="日ごとの距離 (km) の合計"
-            emptyMessage="まだ運動記録がありません"
-            hasData={workoutChartData.length > 0}
-          >
-            <WorkoutChart data={workoutChartData} />
-          </ChartSection>
+          <ActivityCard
+            workouts={workoutPayload}
+            todayIso={todayIso}
+            oldestIso={oldestWorkoutIso}
+          />
         </section>
 
-        <section aria-labelledby="body-chart-heading">
-          <h2 id="body-chart-heading" className="sr-only">
-            体組成推移
+        <section aria-labelledby="body-trend-heading">
+          <h2 id="body-trend-heading" className="sr-only">
+            体組成
           </h2>
-          <ChartSection
-            title="体組成推移 (直近 90 日)"
-            description="体重 (左軸) と体脂肪率 (右軸)"
-            emptyMessage="まだ体組成記録がありません"
-            hasData={bodyChartData.length > 0}
-          >
-            <BodyChart data={bodyChartData} />
-          </ChartSection>
+          <BodyTrendCard
+            bodies={bodyPayload}
+            todayIso={todayIso}
+            oldestIso={oldestBodyIso}
+          />
         </section>
       </main>
     </>

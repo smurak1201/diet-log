@@ -1,7 +1,14 @@
 import type { Metadata } from "next";
+import { SummaryCard } from "@/components/dashboard/summary-card";
+import type { WorkoutPayload } from "@/components/dashboard/types";
 import { EmptyState, RecordCard, Row } from "@/components/record-card";
 import { prisma, safeDb } from "@/lib/db";
-import { formatDateTime, formatDuration, formatPace } from "@/lib/format";
+import {
+  formatDateTime,
+  formatDuration,
+  formatIsoDate,
+  formatPace,
+} from "@/lib/format";
 import { deleteWorkout } from "./actions";
 
 export const metadata: Metadata = {
@@ -17,6 +24,23 @@ export default async function WorkoutPage() {
     "workout.findMany",
   );
 
+  const today = new Date();
+  const todayIso = formatIsoDate(today);
+
+  const workouts = result.ok ? result.data : [];
+  const workoutPayload: WorkoutPayload[] = workouts.map((w) => ({
+    id: w.id,
+    date: w.date.toISOString(),
+    distanceKm: w.distanceKm,
+    durationSec: w.durationSec,
+    calories: w.calories,
+  }));
+  // findMany は desc 取得なので最古は末尾
+  const oldestIso =
+    workouts.length > 0
+      ? workouts[workouts.length - 1].date.toISOString()
+      : null;
+
   return (
     <>
       <header className="w-full border-b border-solid-gray-200 bg-white">
@@ -27,8 +51,17 @@ export default async function WorkoutPage() {
 
       <main
         id="main"
-        className="mx-auto w-full max-w-screen-sm flex-1 px-4 py-6"
+        className="mx-auto flex w-full max-w-screen-sm flex-1 flex-col gap-6 px-4 py-6"
       >
+        {result.ok && (
+          <SummaryCard
+            title="期間サマリー"
+            workouts={workoutPayload}
+            todayIso={todayIso}
+            oldestIso={oldestIso}
+          />
+        )}
+
         {!result.ok ? (
           <p
             role="alert"

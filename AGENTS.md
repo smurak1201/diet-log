@@ -41,6 +41,8 @@ https://design.digital.go.jp/dads/foundations/
 画面構成・URL 対応・PWA 前提は [docs/spec.md](docs/spec.md) を参照。実装側のルール:
 
 - **下部タブナビは root layout に固定配置** ([components/bottom-tab-nav.tsx](components/bottom-tab-nav.tsx))。**各ページに `<footer>` を置かない** (タブバーに被る)
+- **ページヘッダーは [components/page-header.tsx](components/page-header.tsx) (`<PageHeader title="..." />`) を使う**。`<header>` を直書きしない (sticky 化・iOS ステータスバー回避の `safe-area-inset-top` を一元管理)
+- z-index 序列: スキップリンク `z-50` > 下部タブ `z-40` > ヘッダー `z-30`
 - `<body>` の `pb-[calc(4rem+env(safe-area-inset-bottom))]` はタブバー + iOS ホームインジケータ分の余白。**消さない**
 - スキップリンクの遷移先 `id="main"` は**各ページの `<main>` に付ける** (layout 側に置くと `<main>` が重複する)
 - タブ追加・変更は [components/tabs.ts](components/tabs.ts) の `TABS` 定数のみで行う (URL / ラベル / アイコンを一元管理)

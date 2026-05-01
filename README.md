@@ -88,6 +88,7 @@ components/
 ├── dashboard/           # ダッシュボードカード群 (期間切替・グラフ)
 ├── delete-confirm-dialog.tsx
 ├── record-card.tsx
+├── page-header.tsx      # 各ページ共通の sticky ヘッダー
 └── bottom-tab-nav.tsx
 lib/
 ├── db.ts                # Prisma クライアント + safeDb ラッパー

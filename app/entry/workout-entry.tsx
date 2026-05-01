@@ -172,19 +172,11 @@ export function WorkoutEntry() {
       >
         <Field
           label="日付"
-          name="dateOnly"
-          type="date"
-          defaultValue={splitDate(recognized?.date)}
+          name="date"
+          type="datetime-local"
+          defaultValue={toDateTimeLocal(recognized?.date)}
           required
-          error={fieldErrors.dateOnly}
-        />
-        <Field
-          label="時刻"
-          name="timeOnly"
-          type="time"
-          defaultValue={splitTime(recognized?.date)}
-          required
-          error={fieldErrors.timeOnly}
+          error={fieldErrors.date}
         />
         <Field
           label="距離"
@@ -293,7 +285,7 @@ function StatusMessage({ state }: { state: ActionState }) {
 type FieldProps = {
   label: string;
   name: string;
-  type: "date" | "number" | "text" | "time";
+  type: "datetime-local" | "number" | "text";
   step?: string;
   inputMode?: "decimal" | "numeric";
   defaultValue?: string;
@@ -355,16 +347,10 @@ function Field({
 
 // ---- ヘルパー --------------------------------------------------------------
 
-// ISO 文字列を type=date / type=time のそれぞれに分解する
-function splitDate(iso: string | null | undefined): string {
+// ISO 文字列から datetime-local の "YYYY-MM-DDTHH:mm" 形式を抽出
+function toDateTimeLocal(iso: string | null | undefined): string {
   if (!iso) return "";
-  return iso.replace(/Z$/, "").replace(/([+-]\d{2}:?\d{2})$/, "").slice(0, 10);
-}
-
-function splitTime(iso: string | null | undefined): string {
-  if (!iso) return "";
-  const trimmed = iso.replace(/Z$/, "").replace(/([+-]\d{2}:?\d{2})$/, "");
-  return trimmed.slice(11, 16);
+  return iso.replace(/Z$/, "").replace(/([+-]\d{2}:?\d{2})$/, "").slice(0, 16);
 }
 
 function formatPace(sec: number): string {

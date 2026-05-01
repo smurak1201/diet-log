@@ -45,34 +45,25 @@ const durationSchema = z
     return parts[0] * 3600 + parts[1] * 60 + parts[2];
   });
 
-// type=date の "YYYY-MM-DD" と type=time の "HH:mm" を別フィールドで受け取り、最後に Date に結合する
-const workoutSchema = z
-  .object({
-    dateOnly: z
-      .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/, "日付を入力してください"),
-    timeOnly: z
-      .string()
-      .regex(/^\d{2}:\d{2}$/, "時刻を入力してください"),
-    distanceKm: z.coerce
-      .number()
-      .positive("距離は正の数値を入力してください"),
-    paceSecPerKm: paceSchema,
-    durationSec: durationSchema,
-    calories: z.coerce
-      .number()
-      .int()
-      .positive("カロリーは正の整数を入力してください"),
-    avgHeartRate: z.coerce
-      .number()
-      .int()
-      .min(30, "心拍数は 30 以上で入力してください")
-      .max(250, "心拍数は 250 以下で入力してください"),
-  })
-  .transform(({ dateOnly, timeOnly, ...rest }) => ({
-    date: new Date(`${dateOnly}T${timeOnly}:00`),
-    ...rest,
-  }));
+const workoutSchema = z.object({
+  // datetime-local の "YYYY-MM-DDTHH:mm" 形式 (タイムゾーンなし) を Date に変換
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, "日時を入力してください")
+    .transform((v) => new Date(`${v}:00`)),
+  distanceKm: z.coerce.number().positive("距離は正の数値を入力してください"),
+  paceSecPerKm: paceSchema,
+  durationSec: durationSchema,
+  calories: z.coerce
+    .number()
+    .int()
+    .positive("カロリーは正の整数を入力してください"),
+  avgHeartRate: z.coerce
+    .number()
+    .int()
+    .min(30, "心拍数は 30 以上で入力してください")
+    .max(250, "心拍数は 250 以下で入力してください"),
+});
 
 const bodySchema = z.object({
   // type=date は "YYYY-MM-DD"。Prisma の @db.Date に揃えるため UTC 0 時で正規化
@@ -146,8 +137,7 @@ export async function createWorkout(
 ): Promise<ActionState> {
   // TODO: 認証導入後に session チェックを追加
   const parsed = workoutSchema.safeParse({
-    dateOnly: formData.get("dateOnly"),
-    timeOnly: formData.get("timeOnly"),
+    date: formData.get("date"),
     distanceKm: formData.get("distanceKm"),
     paceSecPerKm: formData.get("paceSecPerKm"),
     durationSec: formData.get("durationSec"),

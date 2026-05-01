@@ -1,6 +1,6 @@
 "use client";
 
-// 体重 (kg) と体脂肪率 (%) を二軸の折れ線グラフで表示
+// 期間内バケット (計測日 or 月平均) の体重 / 体脂肪率を二軸の折れ線で表示
 
 import {
   CartesianGrid,
@@ -12,30 +12,30 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import type { BodyBucket } from "@/lib/summary";
 
 const CHART_WEIGHT = "var(--color-primitive-blue-800)";
 const CHART_BODY_FAT = "var(--color-primitive-magenta-1000)";
 const CHART_GRID = "var(--color-neutral-solid-gray-200)";
 const CHART_TEXT = "var(--color-neutral-solid-gray-700)";
 
-export type BodyChartPoint = {
-  date: string;
-  weightKg: number;
-  bodyFatPct: number;
-};
-
-type Props = { data: BodyChartPoint[] };
+type Props = { data: BodyBucket[] };
 
 export default function BodyChart({ data }: Props) {
   return (
     <div
       role="img"
-      aria-label="日ごとの体重 (kg) と体脂肪率 (%) の折れ線グラフ"
+      aria-label="期間内の体重 (kg) と体脂肪率 (%) の折れ線グラフ"
     >
       <ResponsiveContainer width="100%" height={240}>
         <LineChart data={data} margin={{ top: 8, right: 8, bottom: 8, left: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} />
-          <XAxis dataKey="date" stroke={CHART_TEXT} tick={{ fontSize: 14 }} />
+          <XAxis
+            dataKey="label"
+            stroke={CHART_TEXT}
+            tick={{ fontSize: 14 }}
+            interval="preserveStartEnd"
+          />
           <YAxis
             yAxisId="weight"
             orientation="left"

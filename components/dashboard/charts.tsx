@@ -5,7 +5,7 @@
 // この層を挟んで Server Component (page.tsx) から呼び出せるようにする。
 
 import dynamic from "next/dynamic";
-import { ChartSkeleton } from "./chart-section";
+import { ChartSkeleton } from "./chart-skeleton";
 
 export const WorkoutChart = dynamic(() => import("./workout-chart"), {
   ssr: false,
@@ -16,6 +16,3 @@ export const BodyChart = dynamic(() => import("./body-chart"), {
   ssr: false,
   loading: () => <ChartSkeleton />,
 });
-
-export type { WorkoutChartPoint } from "./workout-chart";
-export type { BodyChartPoint } from "./body-chart";

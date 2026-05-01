@@ -159,8 +159,8 @@ function monthKey(d: Date): string {
 }
 
 function dayBucketLabel(d: Date, type: RangeType): string {
-  // 月モードは「日」のみ (棒の本数が多いので簡潔に)、週モードは "M/D"
-  if (type === "month") return String(d.getUTCDate());
+  // 月モードは「N日」(28-31 本並ぶので簡潔に)、週モードは "M/D"
+  if (type === "month") return `${d.getUTCDate()}日`;
   return `${d.getUTCMonth() + 1}/${d.getUTCDate()}`;
 }
 

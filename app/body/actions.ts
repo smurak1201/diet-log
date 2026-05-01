@@ -16,5 +16,7 @@ export async function deleteBodyComposition(id: string): Promise<DeleteResult> {
     return { kind: "error", error: result.error };
   }
   revalidatePath("/body");
+  // ダッシュボードの体組成カード / 進捗カードにも反映させる
+  revalidatePath("/");
   return { kind: "ok" };
 }

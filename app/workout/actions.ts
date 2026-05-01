@@ -16,5 +16,7 @@ export async function deleteWorkout(id: string): Promise<DeleteResult> {
     return { kind: "error", error: result.error };
   }
   revalidatePath("/workout");
+  // ダッシュボードの運動カードにも反映させる
+  revalidatePath("/");
   return { kind: "ok" };
 }

@@ -177,6 +177,8 @@ export async function createWorkout(
   }
 
   revalidatePath("/workout");
+  // ダッシュボードの運動カードにも反映させる
+  revalidatePath("/");
   return { kind: "ok" };
 }
 
@@ -221,5 +223,7 @@ export async function upsertBodyComposition(
   }
 
   revalidatePath("/body");
+  // ダッシュボードの体組成カード / 進捗カードにも反映させる
+  revalidatePath("/");
   return { kind: "ok", mode: result.data };
 }

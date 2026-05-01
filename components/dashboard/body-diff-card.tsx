@@ -43,8 +43,9 @@ export function BodyDiffCard({
     <article className="rounded-12 border border-solid-gray-200 bg-white p-4">
       <h2 className="text-std-18B-160">ダイエット進捗</h2>
       <p className="mt-1 text-std-14N-130 text-solid-gray-700">
-        開始日 {formatDate(startDate)} から {daysElapsed} 日経過 (初期値:{" "}
-        {formatDate(initial.date)} / 最新: {formatDate(latest.date)})
+        開始日 {formatDate(startDate)} から {daysElapsed} 日経過
+        <br />
+        (初期値: {formatDate(initial.date)} / 最新: {formatDate(latest.date)})
       </p>
       <hr className="my-3 border-solid-gray-200" />
       <dl className="flex flex-col gap-3">

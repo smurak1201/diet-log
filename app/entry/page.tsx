@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { BodyEntry } from "./body-entry";
+import { WorkoutEntry } from "./workout-entry";
 
 export const metadata: Metadata = {
   title: "データ登録 | ダイエットログ",
@@ -13,10 +15,12 @@ export default function EntryPage() {
         </div>
       </header>
 
-      <main id="main" className="mx-auto w-full max-w-screen-sm flex-1 px-4 py-8">
-        <p className="text-std-16N-170 text-solid-gray-700">
-          ここに運動・体組成の入力フォームを配置します。
-        </p>
+      <main
+        id="main"
+        className="mx-auto flex w-full max-w-screen-sm flex-1 flex-col gap-4 px-4 py-6"
+      >
+        <WorkoutEntry />
+        <BodyEntry />
       </main>
     </>
   );

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageHeader } from "@/components/page-header";
 import { EmptyState, RecordCard, Row } from "@/components/record-card";
 import { prisma, safeDb } from "@/lib/db";
 import { formatDate } from "@/lib/format";
@@ -19,11 +20,7 @@ export default async function BodyPage() {
 
   return (
     <>
-      <header className="w-full border-b border-solid-gray-200 bg-white">
-        <div className="mx-auto flex h-14 w-full max-w-screen-sm items-center px-4">
-          <h1 className="text-std-16B-170">体組成</h1>
-        </div>
-      </header>
+      <PageHeader title="体組成" />
 
       <main
         id="main"

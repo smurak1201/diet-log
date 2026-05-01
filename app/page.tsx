@@ -12,6 +12,7 @@ import type {
   BodyPayload,
   WorkoutPayload,
 } from "@/components/dashboard/types";
+import { PageHeader } from "@/components/page-header";
 import { prisma, safeDb } from "@/lib/db";
 import { formatDate, formatIsoDate, getJstToday } from "@/lib/format";
 import { SETTING_KEYS } from "@/lib/settings";
@@ -115,11 +116,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <header className="w-full border-b border-solid-gray-200 bg-white">
-        <div className="mx-auto flex h-14 w-full max-w-screen-sm items-center px-4">
-          <h1 className="text-std-16B-170">ダイエットログ</h1>
-        </div>
-      </header>
+      <PageHeader title="ダイエットログ" />
 
       <main
         id="main"

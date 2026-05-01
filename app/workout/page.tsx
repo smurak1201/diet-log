@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SummaryCard } from "@/components/dashboard/summary-card";
 import type { WorkoutPayload } from "@/components/dashboard/types";
+import { PageHeader } from "@/components/page-header";
 import { EmptyState, RecordCard, Row } from "@/components/record-card";
 import { prisma, safeDb } from "@/lib/db";
 import {
@@ -44,11 +45,7 @@ export default async function WorkoutPage() {
 
   return (
     <>
-      <header className="w-full border-b border-solid-gray-200 bg-white">
-        <div className="mx-auto flex h-14 w-full max-w-screen-sm items-center px-4">
-          <h1 className="text-std-16B-170">運動記録</h1>
-        </div>
-      </header>
+      <PageHeader title="運動記録" />
 
       <main
         id="main"

@@ -10,7 +10,7 @@ import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { cn } from "@/lib/cn";
 
-type DeleteResult = { kind: "ok" } | { kind: "error"; error: string };
+export type DeleteResult = { kind: "ok" } | { kind: "error"; error: string };
 
 type Props = {
   /// "2026/04/30 の体組成記録" など、ボタン aria-label とタイトルに使う
@@ -70,6 +70,9 @@ export function DeleteConfirmDialog({ label, action }: Props) {
         className={cn(
           "rounded-12 bg-white p-0 shadow-4",
           "w-[min(28rem,calc(100vw-2rem))]",
+          // Tailwind preflight が UA の `margin: auto` を `margin: 0` に潰すため、
+          // showModal で中央寄せされるよう m-auto で復元する
+          "fixed inset-0 m-auto",
           "backdrop:bg-solid-gray-900/40",
         )}
       >

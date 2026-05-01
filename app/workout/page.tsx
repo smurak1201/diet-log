@@ -8,6 +8,7 @@ import {
   formatDuration,
   formatIsoDate,
   formatPace,
+  getJstToday,
 } from "@/lib/format";
 import { deleteWorkout } from "./actions";
 
@@ -24,7 +25,7 @@ export default async function WorkoutPage() {
     "workout.findMany",
   );
 
-  const today = new Date();
+  const today = getJstToday();
   const todayIso = formatIsoDate(today);
 
   const workouts = result.ok ? result.data : [];

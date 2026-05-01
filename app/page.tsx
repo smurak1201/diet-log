@@ -14,7 +14,7 @@ import type {
   WorkoutPayload,
 } from "@/components/dashboard/types";
 import { prisma, safeDb } from "@/lib/db";
-import { formatDate, formatIsoDate } from "@/lib/format";
+import { formatDate, formatIsoDate, getJstToday } from "@/lib/format";
 import { SETTING_KEYS } from "@/lib/settings";
 import { calcBodyDiff, calcStreak, daysSince } from "@/lib/summary";
 
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const today = new Date();
+  const today = getJstToday();
 
   const [workoutResult, bodyResult, settingResult] = await Promise.all([
     safeDb(

@@ -6,6 +6,22 @@
 //   サーバー (Vercel = UTC) のローカル時として保存 = UTC 値と壁時計が一致
 // 環境のタイムゾーンに表示が左右されないよう UTC ゲッターで読む。
 
+const JST_OFFSET_MS = 9 * 60 * 60 * 1000;
+
+/// JST における「今日」を、その日の 0:00 UTC を表す Date として返す。
+/// サーバーは UTC 動作なので、`new Date()` をそのまま使うと JST 早朝 (0:00〜9:00) に
+/// 開いたときに前日扱いになり、今週 / 今月の判定が 1 単位ずれる。これを避けるための補正。
+export function getJstToday(): Date {
+  const jstNow = new Date(Date.now() + JST_OFFSET_MS);
+  return new Date(
+    Date.UTC(
+      jstNow.getUTCFullYear(),
+      jstNow.getUTCMonth(),
+      jstNow.getUTCDate(),
+    ),
+  );
+}
+
 export function formatDate(d: Date): string {
   const y = d.getUTCFullYear();
   const m = String(d.getUTCMonth() + 1).padStart(2, "0");

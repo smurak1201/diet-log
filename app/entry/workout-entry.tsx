@@ -348,35 +348,27 @@ function formatDuration(sec: number): string {
 }
 
 // 長辺 1280px / JPEG 0.85 品質に縮小。Server Action のペイロードと Gemini のトークンを節約
-// iOS PWA (WebKit) の対策: bitmap.close() と canvas のサイズ 0 化を try/finally で確実に走らせる。
-// これを忘れると連続変換時にデコーダ/カンバスのメモリプールが詰まり、2 回目以降の toBlob が壊れた blob を返す。
 async function compressImage(file: File, maxEdge = 1280): Promise<File> {
-  let bitmap: ImageBitmap | null = null;
-  let canvas: HTMLCanvasElement | null = null;
+  const bitmap = await createImageBitmap(file);
   try {
-    bitmap = await createImageBitmap(file);
     const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
     if (scale === 1 && file.size < 1024 * 1024) {
       return file;
     }
     const w = Math.round(bitmap.width * scale);
     const h = Math.round(bitmap.height * scale);
-    canvas = document.createElement("canvas");
+    const canvas = document.createElement("canvas");
     canvas.width = w;
     canvas.height = h;
     const ctx = canvas.getContext("2d");
     if (!ctx) return file;
     ctx.drawImage(bitmap, 0, 0, w, h);
     const blob = await new Promise<Blob | null>((resolve) =>
-      canvas!.toBlob(resolve, "image/jpeg", 0.85),
+      canvas.toBlob(resolve, "image/jpeg", 0.85),
     );
-    if (!blob || blob.size === 0) return file;
+    if (!blob) return file;
     return new File([blob], "workout.jpg", { type: "image/jpeg" });
   } finally {
-    bitmap?.close();
-    if (canvas) {
-      canvas.width = 0;
-      canvas.height = 0;
-    }
+    bitmap.close();
   }
 }

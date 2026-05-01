@@ -167,7 +167,7 @@ export function WorkoutEntry() {
         ref={formRef}
         action={handleSubmit}
         onChange={handleFormChange}
-        className="mt-2 grid grid-cols-3 gap-x-3 gap-y-4"
+        className="mt-2 grid grid-cols-2 gap-x-3 gap-y-4"
         noValidate
       >
         <Field

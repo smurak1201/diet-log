@@ -26,6 +26,7 @@ type RunRecognition = {
 export function WorkoutEntry() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [recognized, setRecognized] = useState<RunRecognition | null>(null);
+  // 認識結果を defaultValue に流し込んだ後、key 変更で <form> を再マウントして反映させる
   const [formKey, setFormKey] = useState(0);
   const [recognizeError, setRecognizeError] = useState<string | null>(null);
   const [isRecognizing, startRecognize] = useTransition();

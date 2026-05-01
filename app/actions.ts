@@ -1,8 +1,6 @@
 "use server";
 
-// ダッシュボード (/) で使う Server Action
-// - setDietStartDate: ダイエット開始日を upsert
-// - clearDietStartDate: 開始日をリセット
+// ダッシュボード (/) で使う Server Action — ダイエット開始日を upsert する
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -13,8 +11,6 @@ export type SettingActionState =
   | { kind: "idle" }
   | { kind: "ok" }
   | { kind: "error"; error: string; fieldErrors?: Record<string, string[]> };
-
-export type DeleteResult = { ok: true } | { ok: false; error: string };
 
 const dietStartDateSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "日付の形式が不正です"),
@@ -84,20 +80,4 @@ export async function setDietStartDate(
 
   revalidatePath("/");
   return { kind: "ok" };
-}
-
-export async function clearDietStartDate(): Promise<DeleteResult> {
-  // delete だと P2025 が出るため deleteMany で「無ければ何もしない」にする
-  const result = await safeDb(
-    () =>
-      prisma.setting.deleteMany({
-        where: { key: SETTING_KEYS.dietStartDate },
-      }),
-    "clearDietStartDate",
-  );
-
-  if (!result.ok) return { ok: false, error: result.error };
-
-  revalidatePath("/");
-  return { ok: true };
 }

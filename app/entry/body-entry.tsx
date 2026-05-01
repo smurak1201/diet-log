@@ -28,6 +28,7 @@ export function BodyEntry() {
     }
   }
 
+  // 編集された input のフィールドエラーを消す (再 submit を待たずに見た目だけ即時反映)
   function handleFormChange(e: React.ChangeEvent<HTMLFormElement>) {
     const target = e.target;
     if (!(target instanceof HTMLInputElement) || !target.name) return;

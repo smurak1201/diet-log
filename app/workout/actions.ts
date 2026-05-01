@@ -1,9 +1,10 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { prisma, safeDb } from "@/lib/db";
+// /workout の Server Action — 運動記録を削除する
 
-export type DeleteResult = { kind: "ok" } | { kind: "error"; error: string };
+import { revalidatePath } from "next/cache";
+import type { DeleteResult } from "@/components/delete-confirm-dialog";
+import { prisma, safeDb } from "@/lib/db";
 
 export async function deleteWorkout(id: string): Promise<DeleteResult> {
   // TODO: 認証導入後に session チェックを追加

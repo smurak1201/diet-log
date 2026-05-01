@@ -41,13 +41,6 @@ export function formatPace(sec: number): string {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
-/// チャート用の短縮日付ラベル ("MM/DD" / UTC ベース)
-export function formatChartDate(d: Date): string {
-  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(d.getUTCDate()).padStart(2, "0");
-  return `${m}/${day}`;
-}
-
 /// type=date / value 互換の "YYYY-MM-DD" (UTC ベース)
 export function formatIsoDate(d: Date): string {
   const y = d.getUTCFullYear();

@@ -50,6 +50,14 @@ export function WorkoutEntry() {
     }
   }
 
+  function handleClear() {
+    setState({ kind: "idle" });
+    setRecognized(null);
+    setRecognizeError(null);
+    setFormKey((k) => k + 1);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -87,7 +95,7 @@ export function WorkoutEntry() {
         Nike Run Club のスクショから自動入力できます。値を確認・修正してから登録してください。
       </p>
 
-      <div className="mt-4">
+      <div className="mt-4 flex flex-wrap gap-2">
         <label
           className={cn(
             "inline-flex min-h-11 items-center gap-2 rounded-8 border border-blue-800 px-4 text-std-16B-170 text-blue-800",
@@ -115,14 +123,29 @@ export function WorkoutEntry() {
             aria-label="Nike Run Club のスクリーンショット"
           />
         </label>
-        <p
-          role="status"
-          aria-live="polite"
-          className="mt-2 min-h-6 text-std-14N-130 text-error-1"
+        <button
+          type="button"
+          onClick={handleClear}
+          disabled={isRecognizing}
+          className={cn(
+            "inline-flex min-h-11 items-center gap-2 rounded-8 border border-solid-gray-420 px-4 text-std-16N-170 text-solid-gray-900",
+            "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-blue",
+            "disabled:opacity-60",
+          )}
         >
-          {recognizeError ?? ""}
-        </p>
+          <span className="material-symbols-outlined" aria-hidden>
+            restart_alt
+          </span>
+          <span>クリア</span>
+        </button>
       </div>
+      <p
+        role="status"
+        aria-live="polite"
+        className="mt-2 min-h-6 text-std-14N-130 text-error-1"
+      >
+        {recognizeError ?? ""}
+      </p>
 
       <form
         key={formKey}
@@ -155,7 +178,6 @@ export function WorkoutEntry() {
           name="paceSecPerKm"
           type="text"
           inputMode="numeric"
-          placeholder="5:30"
           defaultValue={
             recognized?.paceSecPerKm != null
               ? formatPace(recognized.paceSecPerKm)
@@ -170,7 +192,6 @@ export function WorkoutEntry() {
           name="durationSec"
           type="text"
           inputMode="numeric"
-          placeholder="32:10"
           defaultValue={
             recognized?.durationSec != null
               ? formatDuration(recognized.durationSec)
@@ -251,7 +272,6 @@ type FieldProps = {
   type: "datetime-local" | "number" | "text";
   step?: string;
   inputMode?: "decimal" | "numeric";
-  placeholder?: string;
   defaultValue?: string;
   required?: boolean;
   unit?: string;
@@ -264,7 +284,6 @@ function Field({
   type,
   step,
   inputMode,
-  placeholder,
   defaultValue,
   required,
   unit,
@@ -285,7 +304,6 @@ function Field({
           type={type}
           step={step}
           inputMode={inputMode}
-          placeholder={placeholder}
           defaultValue={defaultValue}
           required={required}
           aria-invalid={error ? true : undefined}

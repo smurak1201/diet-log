@@ -19,6 +19,7 @@
   - DB 型: `TIMESTAMP(0)` (秒・ミリ秒は切り捨て)
   - 入力 UI: `<input type="datetime-local">` を想定。Server Action で `new Date(value)` して保存
 - 1 日に複数件登録可。一覧では `date` の降順で表示する想定
+- **同じ時分での重複登録は禁止** — 同一人物が同じ分に 2 回走り始めることは現実的にないため、`date` に `@unique` を付ける。重複時は P2002 エラー → 「同じデータがすでに登録されています」を返す
 
 ### 体組成記録 (`BodyComposition`)
 

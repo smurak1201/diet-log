@@ -39,6 +39,11 @@ export function BodyEntry() {
     });
   }
 
+  function handleClear() {
+    setFieldErrors({});
+    formRef.current?.reset();
+  }
+
   const today = new Date().toISOString().slice(0, 10);
 
   return (
@@ -53,11 +58,28 @@ export function BodyEntry() {
         同じ日付で再登録すると上書きされます。
       </p>
 
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={handleClear}
+          className={cn(
+            "inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-8 border border-solid-gray-420 px-4 text-std-16N-170 text-solid-gray-900",
+            "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-blue",
+            "transition-all hover:bg-solid-gray-50 active:translate-y-px active:scale-[0.98] active:bg-solid-gray-50",
+          )}
+        >
+          <span className="material-symbols-outlined" aria-hidden>
+            restart_alt
+          </span>
+          <span>クリア</span>
+        </button>
+      </div>
+
       <form
         ref={formRef}
         action={handleSubmit}
         onChange={handleFormChange}
-        className="mt-4 grid grid-cols-2 gap-x-3 gap-y-4"
+        className="mt-2 grid grid-cols-2 gap-x-3 gap-y-4"
         noValidate
       >
         <Field

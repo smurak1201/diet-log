@@ -7,18 +7,32 @@ import { type ActionState, upsertBodyComposition } from "./actions";
 
 export function BodyEntry() {
   const [state, setState] = useState<ActionState>({ kind: "idle" });
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const formRef = useRef<HTMLFormElement>(null);
   const headingId = useId();
 
   async function handleSubmit(formData: FormData) {
     const result = await upsertBodyComposition({ kind: "idle" }, formData);
     setState(result);
+    setFieldErrors(
+      result.kind === "error" ? (result.fieldErrors ?? {}) : {},
+    );
     if (result.kind === "ok") {
       formRef.current?.reset();
     }
   }
 
-  const fieldErrors = state.kind === "error" ? state.fieldErrors : undefined;
+  function handleFormChange(e: React.ChangeEvent<HTMLFormElement>) {
+    const target = e.target;
+    if (!(target instanceof HTMLInputElement) || !target.name) return;
+    setFieldErrors((prev) => {
+      if (!prev[target.name]) return prev;
+      const next = { ...prev };
+      delete next[target.name];
+      return next;
+    });
+  }
+
   const today = new Date().toISOString().slice(0, 10);
 
   return (
@@ -36,7 +50,8 @@ export function BodyEntry() {
       <form
         ref={formRef}
         action={handleSubmit}
-        className="mt-4 grid grid-cols-2 gap-x-3 gap-y-4"
+        onChange={handleFormChange}
+        className="mt-4 grid grid-cols-3 gap-x-3 gap-y-4"
         noValidate
       >
         <Field
@@ -45,7 +60,7 @@ export function BodyEntry() {
           type="date"
           defaultValue={today}
           required
-          error={fieldErrors?.date}
+          error={fieldErrors.date}
         />
         <Field
           label="体重"
@@ -55,7 +70,7 @@ export function BodyEntry() {
           inputMode="decimal"
           required
           unit="kg"
-          error={fieldErrors?.weightKg}
+          error={fieldErrors.weightKg}
         />
         <Field
           label="体脂肪率"
@@ -65,7 +80,7 @@ export function BodyEntry() {
           inputMode="decimal"
           required
           unit="%"
-          error={fieldErrors?.bodyFatPct}
+          error={fieldErrors.bodyFatPct}
         />
         <Field
           label="筋肉量"
@@ -75,7 +90,7 @@ export function BodyEntry() {
           inputMode="decimal"
           required
           unit="kg"
-          error={fieldErrors?.muscleMassKg}
+          error={fieldErrors.muscleMassKg}
         />
         <Field
           label="内臓脂肪"
@@ -84,7 +99,7 @@ export function BodyEntry() {
           step="0.1"
           inputMode="decimal"
           required
-          error={fieldErrors?.visceralFat}
+          error={fieldErrors.visceralFat}
         />
         <Field
           label="基礎代謝"
@@ -94,7 +109,7 @@ export function BodyEntry() {
           inputMode="numeric"
           required
           unit="kcal"
-          error={fieldErrors?.basalMetabolism}
+          error={fieldErrors.basalMetabolism}
         />
 
         <SubmitButton />
@@ -187,7 +202,7 @@ function Field({
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errorId : undefined}
           className={cn(
-            "min-h-11 min-w-0 flex-1 rounded-8 border border-solid-gray-420 bg-white px-3 text-std-16N-170",
+            "h-11 min-w-0 flex-1 rounded-8 border border-solid-gray-420 bg-white px-3 text-std-16N-170",
             "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-blue",
             error && "border-error-1",
           )}

@@ -30,6 +30,7 @@ export function WorkoutEntry() {
   // form リセット・認識結果クリアを transition コールバック内で同期実行するため
   // (Effect 内で setState すると set-state-in-effect lint に引っかかる)
   const [state, setState] = useState<ActionState>({ kind: "idle" });
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [recognized, setRecognized] = useState<RunRecognition | null>(null);
   const [formKey, setFormKey] = useState(0);
   const [recognizeError, setRecognizeError] = useState<string | null>(null);
@@ -42,6 +43,9 @@ export function WorkoutEntry() {
   async function handleSubmit(formData: FormData) {
     const result = await createWorkout({ kind: "idle" }, formData);
     setState(result);
+    setFieldErrors(
+      result.kind === "error" ? (result.fieldErrors ?? {}) : {},
+    );
     if (result.kind === "ok") {
       formRef.current?.reset();
       setRecognized(null);
@@ -50,8 +54,21 @@ export function WorkoutEntry() {
     }
   }
 
+  // 編集された input のフィールドエラーを消す (再 submit を待たずに見た目だけ即時反映)
+  function handleFormChange(e: React.ChangeEvent<HTMLFormElement>) {
+    const target = e.target;
+    if (!(target instanceof HTMLInputElement) || !target.name) return;
+    setFieldErrors((prev) => {
+      if (!prev[target.name]) return prev;
+      const next = { ...prev };
+      delete next[target.name];
+      return next;
+    });
+  }
+
   function handleClear() {
     setState({ kind: "idle" });
+    setFieldErrors({});
     setRecognized(null);
     setRecognizeError(null);
     setFormKey((k) => k + 1);
@@ -80,8 +97,6 @@ export function WorkoutEntry() {
       }
     });
   }
-
-  const fieldErrors = state.kind === "error" ? state.fieldErrors : undefined;
 
   return (
     <section
@@ -151,16 +166,25 @@ export function WorkoutEntry() {
         key={formKey}
         ref={formRef}
         action={handleSubmit}
-        className="mt-2 grid grid-cols-2 gap-x-3 gap-y-4"
+        onChange={handleFormChange}
+        className="mt-2 grid grid-cols-3 gap-x-3 gap-y-4"
         noValidate
       >
         <Field
-          label="日時"
-          name="date"
-          type="datetime-local"
-          defaultValue={recognized?.date ? toDateTimeLocal(recognized.date) : ""}
+          label="日付"
+          name="dateOnly"
+          type="date"
+          defaultValue={splitDate(recognized?.date)}
           required
-          error={fieldErrors?.date}
+          error={fieldErrors.dateOnly}
+        />
+        <Field
+          label="時刻"
+          name="timeOnly"
+          type="time"
+          defaultValue={splitTime(recognized?.date)}
+          required
+          error={fieldErrors.timeOnly}
         />
         <Field
           label="距離"
@@ -171,7 +195,7 @@ export function WorkoutEntry() {
           defaultValue={recognized?.distanceKm?.toString() ?? ""}
           required
           unit="km"
-          error={fieldErrors?.distanceKm}
+          error={fieldErrors.distanceKm}
         />
         <Field
           label="平均ペース"
@@ -185,10 +209,10 @@ export function WorkoutEntry() {
           }
           required
           unit="/km"
-          error={fieldErrors?.paceSecPerKm}
+          error={fieldErrors.paceSecPerKm}
         />
         <Field
-          label="時間"
+          label="走行時間"
           name="durationSec"
           type="text"
           inputMode="numeric"
@@ -198,7 +222,7 @@ export function WorkoutEntry() {
               : ""
           }
           required
-          error={fieldErrors?.durationSec}
+          error={fieldErrors.durationSec}
         />
         <Field
           label="消費カロリー"
@@ -209,7 +233,7 @@ export function WorkoutEntry() {
           defaultValue={recognized?.calories?.toString() ?? ""}
           required
           unit="kcal"
-          error={fieldErrors?.calories}
+          error={fieldErrors.calories}
         />
         <Field
           label="平均心拍数"
@@ -220,7 +244,7 @@ export function WorkoutEntry() {
           defaultValue={recognized?.avgHeartRate?.toString() ?? ""}
           required
           unit="bpm"
-          error={fieldErrors?.avgHeartRate}
+          error={fieldErrors.avgHeartRate}
         />
 
         <SubmitButton />
@@ -269,7 +293,7 @@ function StatusMessage({ state }: { state: ActionState }) {
 type FieldProps = {
   label: string;
   name: string;
-  type: "datetime-local" | "number" | "text";
+  type: "date" | "number" | "text" | "time";
   step?: string;
   inputMode?: "decimal" | "numeric";
   defaultValue?: string;
@@ -309,7 +333,7 @@ function Field({
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errorId : undefined}
           className={cn(
-            "min-h-11 min-w-0 flex-1 rounded-8 border border-solid-gray-420 bg-white px-3 text-std-16N-170",
+            "h-11 min-w-0 flex-1 rounded-8 border border-solid-gray-420 bg-white px-3 text-std-16N-170",
             "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-blue",
             error && "border-error-1",
           )}
@@ -331,10 +355,16 @@ function Field({
 
 // ---- ヘルパー --------------------------------------------------------------
 
-// "2026-05-01T07:30:00Z" 等の ISO 文字列から datetime-local の "YYYY-MM-DDTHH:mm" 形式に
-function toDateTimeLocal(iso: string): string {
+// ISO 文字列を type=date / type=time のそれぞれに分解する
+function splitDate(iso: string | null | undefined): string {
+  if (!iso) return "";
+  return iso.replace(/Z$/, "").replace(/([+-]\d{2}:?\d{2})$/, "").slice(0, 10);
+}
+
+function splitTime(iso: string | null | undefined): string {
+  if (!iso) return "";
   const trimmed = iso.replace(/Z$/, "").replace(/([+-]\d{2}:?\d{2})$/, "");
-  return trimmed.slice(0, 16);
+  return trimmed.slice(11, 16);
 }
 
 function formatPace(sec: number): string {

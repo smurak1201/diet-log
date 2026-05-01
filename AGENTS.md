@@ -143,4 +143,6 @@ https://design.digital.go.jp/dads/foundations/
 - **画像**: `next/image` を使う (自動最適化 / 遅延読み込み / レスポンシブ)
 - **`dangerouslySetInnerHTML` は原則禁止**。必要な場合は事前にサニタイズ
 - **環境変数**: `NEXT_PUBLIC_` プレフィックス付きは client bundle に出る — secret は付けない
-- **`alert()` / `confirm()` を使わない**: 通知は toast / `aria-live` リージョン、確認はモーダルで。toast ライブラリを採用したら本ファイルに追記する
+- **`alert()` / `confirm()` を使わない**: 通知は toast / `aria-live` リージョン、確認はモーダルで。
+  - **toast ライブラリは [sonner](https://sonner.emilkowal.ski/)** を採用。`toast.success()` / `toast.error()` を使う ([components/toaster.tsx](components/toaster.tsx) で root layout に配置済み)。配色は [app/globals.css](app/globals.css) で DADS の `success-1` / `error-1` に上書き
+  - フォームのフィールドエラーは toast ではなく**該当 input 直下に inline 表示**する (どこを直すか分かるように)。toast は「登録しました」「同じデータがすでに登録されています」など全体の結果通知に使う

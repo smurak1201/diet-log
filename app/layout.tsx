@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Noto_Sans_JP } from "next/font/google";
 import { BottomTabNav } from "@/components/bottom-tab-nav";
+import { Toaster } from "@/components/toaster";
 import { cn } from "@/lib/cn";
 import "./globals.css";
 
@@ -67,6 +68,7 @@ export default function RootLayout({
         </a>
         {children}
         <BottomTabNav />
+        <Toaster />
       </body>
     </html>
   );

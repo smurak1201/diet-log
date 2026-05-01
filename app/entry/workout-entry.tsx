@@ -8,12 +8,9 @@ import {
   useTransition,
 } from "react";
 import { useFormStatus } from "react-dom";
+import { toast } from "sonner";
 import { cn } from "@/lib/cn";
-import {
-  type ActionState,
-  createWorkout,
-  recognizeWorkoutImage,
-} from "./actions";
+import { createWorkout, recognizeWorkoutImage } from "./actions";
 
 // Server から返る認識結果の形 (lib/gemini.ts の RunRecognition と同形だが、Client にロードされないよう型をここに持つ)
 type RunRecognition = {
@@ -26,10 +23,6 @@ type RunRecognition = {
 };
 
 export function WorkoutEntry() {
-  // useActionState は使わず、自前で state 管理する。submit 成功時に
-  // form リセット・認識結果クリアを transition コールバック内で同期実行するため
-  // (Effect 内で setState すると set-state-in-effect lint に引っかかる)
-  const [state, setState] = useState<ActionState>({ kind: "idle" });
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [recognized, setRecognized] = useState<RunRecognition | null>(null);
   const [formKey, setFormKey] = useState(0);
@@ -42,15 +35,17 @@ export function WorkoutEntry() {
 
   async function handleSubmit(formData: FormData) {
     const result = await createWorkout({ kind: "idle" }, formData);
-    setState(result);
     setFieldErrors(
       result.kind === "error" ? (result.fieldErrors ?? {}) : {},
     );
     if (result.kind === "ok") {
+      toast.success("運動記録を登録しました");
       formRef.current?.reset();
       setRecognized(null);
       setFormKey((k) => k + 1);
       if (fileInputRef.current) fileInputRef.current.value = "";
+    } else if (result.kind === "error") {
+      toast.error(result.error);
     }
   }
 
@@ -67,7 +62,6 @@ export function WorkoutEntry() {
   }
 
   function handleClear() {
-    setState({ kind: "idle" });
     setFieldErrors({});
     setRecognized(null);
     setRecognizeError(null);
@@ -242,7 +236,6 @@ export function WorkoutEntry() {
         />
 
         <SubmitButton />
-        <StatusMessage state={state} />
       </form>
     </section>
   );
@@ -264,24 +257,6 @@ function SubmitButton() {
     >
       {pending ? "登録中…" : "登録する"}
     </button>
-  );
-}
-
-function StatusMessage({ state }: { state: ActionState }) {
-  let message = "";
-  if (state.kind === "ok") message = "登録しました";
-  else if (state.kind === "error") message = state.error;
-  return (
-    <p
-      role="status"
-      aria-live="polite"
-      className={cn(
-        "col-span-2 min-h-6 text-std-14N-130",
-        state.kind === "error" ? "text-error-1" : "text-success-1",
-      )}
-    >
-      {message}
-    </p>
   );
 }
 

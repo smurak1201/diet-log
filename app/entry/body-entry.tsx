@@ -2,23 +2,29 @@
 
 import { useId, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
+import { toast } from "sonner";
 import { cn } from "@/lib/cn";
-import { type ActionState, upsertBodyComposition } from "./actions";
+import { upsertBodyComposition } from "./actions";
 
 export function BodyEntry() {
-  const [state, setState] = useState<ActionState>({ kind: "idle" });
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const formRef = useRef<HTMLFormElement>(null);
   const headingId = useId();
 
   async function handleSubmit(formData: FormData) {
     const result = await upsertBodyComposition({ kind: "idle" }, formData);
-    setState(result);
     setFieldErrors(
       result.kind === "error" ? (result.fieldErrors ?? {}) : {},
     );
     if (result.kind === "ok") {
+      toast.success(
+        result.mode === "updated"
+          ? "体組成を更新しました"
+          : "体組成を登録しました",
+      );
       formRef.current?.reset();
+    } else if (result.kind === "error") {
+      toast.error(result.error);
     }
   }
 
@@ -113,8 +119,6 @@ export function BodyEntry() {
         />
 
         <SubmitButton />
-
-        <StatusMessage state={state} />
       </form>
     </section>
   );
@@ -136,27 +140,6 @@ function SubmitButton() {
     >
       {pending ? "登録中…" : "登録する"}
     </button>
-  );
-}
-
-function StatusMessage({ state }: { state: ActionState }) {
-  let message = "";
-  if (state.kind === "ok") {
-    message = state.mode === "updated" ? "更新しました" : "登録しました";
-  } else if (state.kind === "error") {
-    message = state.error;
-  }
-  return (
-    <p
-      role="status"
-      aria-live="polite"
-      className={cn(
-        "col-span-2 min-h-6 text-std-14N-130",
-        state.kind === "error" ? "text-error-1" : "text-success-1",
-      )}
-    >
-      {message}
-    </p>
   );
 }
 

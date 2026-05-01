@@ -127,6 +127,20 @@ export async function recognizeWorkoutImage(
     return { kind: "ok", data: recognized };
   } catch (e) {
     console.error("[recognizeWorkoutImage] failed:", e);
+    // Gemini 無料枠 (10 RPM / 20 RPD) を超えると 429 RESOURCE_EXHAUSTED が返る。
+    // 「画像認識に失敗」だと原因が不明瞭なので、レート制限の場合は専用メッセージを出す
+    if (
+      typeof e === "object" &&
+      e !== null &&
+      "status" in e &&
+      (e as { status: number }).status === 429
+    ) {
+      return {
+        kind: "error",
+        error:
+          "画像認識の利用上限に達しました。時間をおいて再試行するか、手入力で登録してください",
+      };
+    }
     return { kind: "error", error: "画像認識に失敗しました。手入力で登録してください" };
   }
 }

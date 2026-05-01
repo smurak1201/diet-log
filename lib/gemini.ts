@@ -22,7 +22,8 @@ if (process.env.NODE_ENV !== "production") {
   globalForGenAI.genAI = genAI;
 }
 
-// 画像入力対応・JSON モード対応・無料枠あり (2026年5月時点で 10 RPM / 250 RPD)
+// 画像入力対応・JSON モード対応・無料枠あり (2026年5月時点で gemini-2.5-flash は 10 RPM / 20 RPD)
+// 日次 20 件は使い切りやすいので、超過時は actions.ts で 429 を検知してユーザーに明示する
 const MODEL = "gemini-2.5-flash";
 
 function buildPrompt(nowLocal: string): string {

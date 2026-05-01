@@ -53,7 +53,11 @@ export function WorkoutEntry() {
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    // 新しい画像を選んだ瞬間にフォームを空にする
+    // (認識失敗時に前回の認識結果が残るのを防ぐ + 認識中に古い値を見せない)
     setRecognizeError(null);
+    setRecognized(null);
+    setFormKey((k) => k + 1);
 
     startRecognize(async () => {
       const compressed = await compressImage(file).catch(() => file);

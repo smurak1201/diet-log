@@ -187,13 +187,15 @@ function Field({
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errorId : undefined}
           className={cn(
-            "min-h-11 flex-1 rounded-8 border border-solid-gray-420 bg-white px-3 text-std-16N-170",
+            "min-h-11 min-w-0 flex-1 rounded-8 border border-solid-gray-420 bg-white px-3 text-std-16N-170",
             "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-blue",
             error && "border-error-1",
           )}
         />
         {unit && (
-          <span className="text-std-14N-130 text-solid-gray-700">{unit}</span>
+          <span className="shrink-0 text-std-14N-130 text-solid-gray-700">
+            {unit}
+          </span>
         )}
       </div>
       {error && (

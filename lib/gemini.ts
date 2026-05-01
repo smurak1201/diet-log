@@ -22,8 +22,8 @@ if (process.env.NODE_ENV !== "production") {
   globalForGenAI.genAI = genAI;
 }
 
-// 画像入力対応・JSON モード対応・無料枠が広いモデルを採用
-const MODEL = "gemini-2.0-flash";
+// 画像入力対応・JSON モード対応・無料枠あり (2026年5月時点で 10 RPM / 250 RPD)
+const MODEL = "gemini-2.5-flash";
 
 function buildPrompt(nowLocal: string): string {
   return `あなたは Nike Run Club の結果画面スクリーンショット (日本語 UI) から走行データを抽出するアシスタントです。

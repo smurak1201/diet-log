@@ -40,6 +40,17 @@ model Workout {
   updatedAt    DateTime @updatedAt
 }
 
+/// アプリ全体の設定値 (key/value の汎用ストア)。
+/// 単一ユーザー前提のため key を主キーにする。auth 導入時に @@unique([userId, key]) へ拡張する想定
+model Setting {
+  /// 設定キー (例: "dietStartDate")
+  key       String   @id
+  /// 設定値 (日付なら "YYYY-MM-DD" 等の文字列で持つ)
+  value     String
+  /// 更新日時
+  updatedAt DateTime @updatedAt
+}
+
 /// 体組成記録 (1 日 1 件 — 同日付は upsert で上書き)
 model BodyComposition {
   /// レコード ID

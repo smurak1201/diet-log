@@ -130,7 +130,7 @@ function SubmitButton() {
       className={cn(
         "col-span-2 min-h-11 cursor-pointer rounded-8 bg-blue-800 px-4 text-std-16B-170 text-white",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-blue",
-        "transition-colors hover:bg-blue-900 active:bg-blue-900",
+        "transition-all hover:bg-blue-900 active:translate-y-px active:scale-[0.98] active:bg-blue-900",
         "disabled:cursor-not-allowed disabled:opacity-60",
       )}
     >

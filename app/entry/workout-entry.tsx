@@ -115,7 +115,7 @@ export function WorkoutEntry() {
           className={cn(
             "inline-flex min-h-11 items-center gap-2 rounded-8 border border-blue-800 px-4 text-std-16B-170 text-blue-800",
             "cursor-pointer focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus-blue",
-            "transition-colors hover:bg-blue-50 active:bg-blue-50",
+            "transition-all hover:bg-blue-50 active:translate-y-px active:scale-[0.98] active:bg-blue-50",
             isRecognizing && "opacity-60",
           )}
         >
@@ -146,7 +146,7 @@ export function WorkoutEntry() {
           className={cn(
             "inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-8 border border-solid-gray-420 px-4 text-std-16N-170 text-solid-gray-900",
             "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-blue",
-            "transition-colors hover:bg-solid-gray-50 active:bg-solid-gray-50",
+            "transition-all hover:bg-solid-gray-50 active:translate-y-px active:scale-[0.98] active:bg-solid-gray-50",
             "disabled:cursor-not-allowed disabled:opacity-60",
           )}
         >
@@ -258,7 +258,7 @@ function SubmitButton() {
       className={cn(
         "col-span-2 min-h-11 cursor-pointer rounded-8 bg-blue-800 px-4 text-std-16B-170 text-white",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-blue",
-        "transition-colors hover:bg-blue-900 active:bg-blue-900",
+        "transition-all hover:bg-blue-900 active:translate-y-px active:scale-[0.98] active:bg-blue-900",
         "disabled:cursor-not-allowed disabled:opacity-60",
       )}
     >

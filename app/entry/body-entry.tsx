@@ -40,7 +40,6 @@ export function BodyEntry() {
         noValidate
       >
         <Field
-          wide
           label="日付"
           name="date"
           type="date"
@@ -88,7 +87,6 @@ export function BodyEntry() {
           error={fieldErrors?.visceralFat}
         />
         <Field
-          wide
           label="基礎代謝"
           name="basalMetabolism"
           type="number"
@@ -156,7 +154,6 @@ type FieldProps = {
   required?: boolean;
   unit?: string;
   error?: string[];
-  wide?: boolean;
 };
 
 function Field({
@@ -169,12 +166,11 @@ function Field({
   required,
   unit,
   error,
-  wide,
 }: FieldProps) {
   const id = useId();
   const errorId = `${id}-error`;
   return (
-    <div className={cn("flex flex-col gap-1", wide && "col-span-2")}>
+    <div className="flex flex-col gap-1">
       <label htmlFor={id} className="text-std-14B-130">
         {label}
         {required && <span className="ml-1 text-error-1" aria-hidden>*</span>}

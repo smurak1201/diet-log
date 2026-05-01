@@ -58,7 +58,7 @@ export function ActivityCard({ workouts, todayIso, oldestIso }: Props) {
         {metrics.count > 0 ? (
           <WorkoutChart data={buckets} />
         ) : (
-          <p className="py-12 text-center text-std-16N-170 text-solid-gray-700">
+          <p className="flex h-60 items-center justify-center text-std-16N-170 text-solid-gray-700">
             この期間の運動記録はありません
           </p>
         )}

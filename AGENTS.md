@@ -22,6 +22,7 @@ https://design.digital.go.jp/dads/foundations/
 - アイコン: Material Symbols (Outlined) — Google Fonts CDN で root layout に読み込み済み。**他のアイコンライブラリは追加しない**。基本形: `<span className="material-symbols-outlined" aria-hidden="true">directions_walk</span>` (アイコン単独のボタンは `aria-label` 必須)
   - 例外: ファビコン (`app/icon.svg`) はフォントが使えないので SVG パスを直接埋め込む
 - 配色: DADS トークンユーティリティのみ (例: `bg-white`, `text-solid-gray-900`, `border-solid-gray-200`, `bg-blue-800`, `bg-success-1`)。**生 hex 禁止**。**ダークモード無し** (DADS にダークトークンが存在しないため)。
+  - 生 CSS で白を書きたいとき (sonner の override 等) は `var(--color-neutral-white)` を使う
 - タイポ: DADS タイポプリセット (例: `text-std-16N-170`, `text-std-24B-150`, `text-dns-14N-130`)。**14px 未満禁止**。
 - 角丸: `rounded-{4,6,8,12,16,24,32,full}` (DADS スケール)
 - 影: `shadow-{1..8}` (DADS elevation)
@@ -63,8 +64,18 @@ https://design.digital.go.jp/dads/foundations/
 - ミューテーションは Server Action (`'use server'`) を第一選択。Route Handler (`route.ts`) は外部 API / webhook / 専用 GET 用に限定。
 - **各 Action 冒頭で auth/authz を必ず検証** — Action は POST で直接叩ける。
 - 入力検証は **server 側で zod 等を使い必ず実行**。HTML の `required` / `type=email` は UX hint に過ぎない。
-- ミューテーション後はキャッシュ整合: `revalidateTag(tag, profile)` / `revalidatePath(path)` / `refresh()`。**Next 16 で `revalidateTag` は第2引数 (cacheLife profile) が必須**。
-- `redirect()` は `revalidatePath` / `revalidateTag` の**後**に呼ぶ (redirect 後は実行されない)。
+- ミューテーション後のキャッシュ整合は用途で使い分ける (Next 16):
+  - `updateTag(tag)`: **read-your-writes** (送信 → 即反映)。Server Actions 専用。**フォーム送信後に値を一覧へ即反映したいときはこれが第一選択**
+  - `revalidateTag(tag, 'max')`: stale-while-revalidate。多少の遅延 OK な箇所向け。**単引数形式は deprecated** (TS error)
+  - `revalidatePath(path)`: 特定パスのみ無効化。動的セグメントの場合のみ第2引数 (`'page'` / `'layout'`) が必要。リテラルパスは省略可
+  - `refresh()`: Server Action から client router を refresh
+- `cacheLife` / `cacheTag` は Next 16 で stable (`unstable_` prefix 不要、`next/cache` から直接 import)
+- `redirect()` は `revalidatePath` / `updateTag` / `revalidateTag` の**後**に呼ぶ (redirect 後は実行されない)。
+
+### 認証 / リダイレクト等の前段処理は `proxy`
+- Next 16 で `middleware.ts` は **deprecated**、`proxy.ts` (関数名も `proxy`) に改名された。新規はこちらに書く
+- `proxy` は `nodejs` runtime 固定 (edge 非対応)
+- 設定フラグも改名: `skipMiddlewareUrlNormalize` → `skipProxyUrlNormalize`
 
 ### フォーム
 - `<form action={serverAction}>` を基本形 (progressive enhancement で JS 無しでも動く)。

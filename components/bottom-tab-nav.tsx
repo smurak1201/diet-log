@@ -24,6 +24,7 @@ export function BottomTabNav() {
 
           return (
             <li key={tab.href}>
+              {/* 下端固定タブバーは外側 outline-offset だと画面外/border 上で focus ring が見切れるため、内側 offset を採用 */}
               <Link
                 href={tab.href}
                 aria-current={isActive ? "page" : undefined}

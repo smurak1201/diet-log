@@ -19,8 +19,8 @@ body {
 [data-sonner-toaster] {
   --success-bg: var(--color-semantic-success-1);
   --success-border: var(--color-semantic-success-1);
-  --success-text: #fff;
+  --success-text: var(--color-neutral-white);
   --error-bg: var(--color-semantic-error-1);
   --error-border: var(--color-semantic-error-1);
-  --error-text: #fff;
+  --error-text: var(--color-neutral-white);
 }

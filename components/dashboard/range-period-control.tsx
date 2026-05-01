@@ -38,7 +38,9 @@ export function RangePeriodControl({
           onNext={onNext}
         />
       ) : (
-        <p className="text-std-14N-130 text-solid-gray-700">{range.label}</p>
+        <p className="flex min-h-11 items-center justify-center text-std-16B-170 text-solid-gray-700">
+          {range.label}
+        </p>
       )}
     </div>
   );

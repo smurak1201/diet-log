@@ -8,7 +8,6 @@ import { BodyDiffCard } from "@/components/dashboard/body-diff-card";
 import { BodyTrendCard } from "@/components/dashboard/body-trend-card";
 import { StartDateForm } from "@/components/dashboard/start-date-form";
 import { StartDateSection } from "@/components/dashboard/start-date-section";
-import { StreakCard } from "@/components/dashboard/streak-card";
 import type {
   BodyPayload,
   WorkoutPayload,
@@ -16,7 +15,7 @@ import type {
 import { prisma, safeDb } from "@/lib/db";
 import { formatDate, formatIsoDate, getJstToday } from "@/lib/format";
 import { SETTING_KEYS } from "@/lib/settings";
-import { calcBodyDiff, calcStreak, daysSince } from "@/lib/summary";
+import { calcBodyDiff, daysSince } from "@/lib/summary";
 
 export const metadata: Metadata = {
   title: "ダッシュボード | ダイエットログ",
@@ -85,8 +84,6 @@ export default async function HomePage() {
 
   const workouts = workoutResult.ok ? workoutResult.data : [];
   const bodies = bodyResult.ok ? bodyResult.data : [];
-
-  const streak = calcStreak(workouts, today);
 
   // 期間切替カード用のシリアライズ済みデータ (date は ISO 文字列)
   const workoutPayload: WorkoutPayload[] = workouts.map((w) => ({

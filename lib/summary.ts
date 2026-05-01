@@ -26,13 +26,6 @@ export type WorkoutSummary = {
   calories: number;
 };
 
-export type StreakInfo = {
-  /// 連続運動日数。今日に記録が無い場合は前日からカウントする
-  current: number;
-  /// 今月の運動日数 (重複日は 1 とカウント)
-  monthCount: number;
-};
-
 export type BodyDiff = {
   weightKg: number;
   bodyFatPct: number;
@@ -98,31 +91,6 @@ export function summarizeWorkouts(
     acc.calories += r.calories;
   }
   return acc;
-}
-
-export function calcStreak(rows: WorkoutLike[], today: Date): StreakInfo {
-  const set = new Set(rows.map((r) => dayKey(r.date)));
-
-  // 今日記録があればそこから、無ければ前日から数える (途切れ判定にしない)
-  let cursor = startOfUtcDay(today);
-  if (!set.has(dayKey(cursor))) {
-    cursor = new Date(cursor.getTime() - MS_PER_DAY);
-  }
-
-  let current = 0;
-  while (set.has(dayKey(cursor))) {
-    current += 1;
-    cursor = new Date(cursor.getTime() - MS_PER_DAY);
-  }
-
-  const monthRange = getMonthRange(today);
-  const monthSet = new Set<string>();
-  for (const r of rows) {
-    if (r.date < monthRange.from || r.date >= monthRange.to) continue;
-    monthSet.add(dayKey(r.date));
-  }
-
-  return { current, monthCount: monthSet.size };
 }
 
 export function calcBodyDiff(initial: BodyLike, latest: BodyLike): BodyDiff {

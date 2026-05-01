@@ -11,7 +11,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## Stack
 - Next.js 16 App Router, React 19, TypeScript, Tailwind CSS v4 (CSS-first / `@plugin` 構文)
-- 永続化: **Neon Postgres** (Vercel 経由) + **Prisma** (ORM, 導入予定)。接続情報は `.env` に配置済み。
+- 永続化: **Neon Postgres** (Vercel 経由) + **Prisma** (ORM)。接続情報は `.env` に配置済み。
+- 主要ライブラリ: グラフ = `recharts` / 入力検証 = `zod` / 画像認識 = `@google/genai` (Gemini) / Toast = `sonner`
 - デプロイ先: Vercel
 
 ## Design system — デジタル庁デザインシステム (DADS) を厳守
@@ -51,6 +52,12 @@ https://design.digital.go.jp/dads/foundations/
 - **使わないとき**: 1 行で読める短い className → そのまま文字列で書く (`cn()` で包むのは冗長)
 - 任意値構文 `[...]` より組み込みスケールを優先 (例: `outline-offset-[-2px]` ❌ / `-outline-offset-2` ✅)。`env()` / `calc()` など組み込みで表現できない値だけ `[...]` を使う
 
+## グラフ (recharts)
+- 描画ライブラリは [recharts](https://recharts.org/)。実装は [components/dashboard/](components/dashboard/) を参照
+- 軸 / グリッド / 線 / バーの色は **DADS トークンの CSS 変数** (`var(--color-...)`) を経由する。生 hex は禁止 (DADS 配色ルールに従う)
+- ツールチップやラベルのテキストは DADS タイポプリセット (例: `text-std-14N-130`) を使う
+- 重い chart は [components/dashboard/charts.tsx](components/dashboard/charts.tsx) のように `next/dynamic` で動的 import して初期 bundle を削る (パフォーマンス節と整合)
+
 ## React / Next.js コーディング規約 (Next 16 + React 19)
 
 ### Server / Client コンポーネント
@@ -63,11 +70,12 @@ https://design.digital.go.jp/dads/foundations/
 ### データ変更は Server Actions
 - ミューテーションは Server Action (`'use server'`) を第一選択。Route Handler (`route.ts`) は外部 API / webhook / 専用 GET 用に限定。
 - **各 Action 冒頭で auth/authz を必ず検証** — Action は POST で直接叩ける。
-- 入力検証は **server 側で zod 等を使い必ず実行**。HTML の `required` / `type=email` は UX hint に過ぎない。
+- 入力検証は **server 側で zod を使い必ず実行**。HTML の `required` / `type=email` は UX hint に過ぎない。
+- Action の戻り型は判別共用体で揃える: `{ kind: 'idle' } | { kind: 'ok'; ... } | { kind: 'error'; error: string; fieldErrors?: Record<string, string[]> }`。`useActionState` 側で分岐しやすく、フィールドエラーを inline 表示できる
 - ミューテーション後のキャッシュ整合は用途で使い分ける (Next 16):
-  - `updateTag(tag)`: **read-your-writes** (送信 → 即反映)。Server Actions 専用。**フォーム送信後に値を一覧へ即反映したいときはこれが第一選択**
+  - `revalidatePath(path)`: **単一ページの再描画で済む単純なケースの第一選択** (本アプリは現状ほぼ全てこれ)。動的セグメントの場合のみ第2引数 (`'page'` / `'layout'`) が必要。リテラルパスは省略可
+  - `updateTag(tag)`: **read-your-writes** (送信 → 即反映)。Server Actions 専用。複数の表示箇所をタグ経由でまとめて無効化したいときに使う
   - `revalidateTag(tag, 'max')`: stale-while-revalidate。多少の遅延 OK な箇所向け。**単引数形式は deprecated** (TS error)
-  - `revalidatePath(path)`: 特定パスのみ無効化。動的セグメントの場合のみ第2引数 (`'page'` / `'layout'`) が必要。リテラルパスは省略可
   - `refresh()`: Server Action から client router を refresh
 - `cacheLife` / `cacheTag` は Next 16 で stable (`unstable_` prefix 不要、`next/cache` から直接 import)
 - `redirect()` は `revalidatePath` / `updateTag` / `revalidateTag` の**後**に呼ぶ (redirect 後は実行されない)。
@@ -137,6 +145,14 @@ https://design.digital.go.jp/dads/foundations/
 - **マイグレーション**: スキーマ変更は `prisma migrate dev` で管理。`prisma/schema.prisma` を single source of truth とする
 - **型**: Prisma が生成する型 (`Prisma.UserCreateInput` 等) を活用し、独自に再定義しない
 - **DB 接続を扱うモジュール**には `import 'server-only'` を必ず入れて Client にバンドルされないようにする
+- **one-off スクリプト** (seed / バックフィル等) は [scripts/](scripts/) に置き、`node --env-file=.env scripts/xxx.ts` で実行する (`tsx` が devDependencies に入っているので TypeScript のまま実行可)
+
+## Gemini API (画像認識)
+- 呼び出しは [lib/gemini.ts](lib/gemini.ts) のラッパー経由のみ。**Server Action から呼ぶ** (`import 'server-only'` で Client 混入を防止)
+- 環境変数 `GEMINI_API_KEY` で認証。**`NEXT_PUBLIC_` プレフィックスを付けない** (client bundle に出てしまう)
+- 入力画像は Action 側で **MIME ホワイトリスト** (`image/png`, `image/jpeg`, `image/webp`, `image/heic`, `image/heif`) と **サイズ上限** (8MB) を検証してから渡す
+- レスポンスは `responseSchema` (構造化 JSON) で強制し、推測値を返させない。読み取れない項目は `null`
+- 無料枠 (`gemini-2.5-flash` で 10 RPM / 20 RPD)。**429 RESOURCE_EXHAUSTED** をユーザー向けメッセージ (例: 「画像認識の利用上限に達しました。手入力で登録してください」) に変換する
 
 ## アクセシビリティ実装パターン
 (「UX 制約」の具体実装ルール)

@@ -36,10 +36,11 @@ export function BodyEntry() {
       <form
         ref={formRef}
         action={handleSubmit}
-        className="mt-4 flex flex-col gap-4"
+        className="mt-4 grid grid-cols-2 gap-x-3 gap-y-4"
         noValidate
       >
         <Field
+          wide
           label="日付"
           name="date"
           type="date"
@@ -87,6 +88,7 @@ export function BodyEntry() {
           error={fieldErrors?.visceralFat}
         />
         <Field
+          wide
           label="基礎代謝"
           name="basalMetabolism"
           type="number"
@@ -113,7 +115,7 @@ function SubmitButton() {
       disabled={pending}
       aria-busy={pending}
       className={cn(
-        "min-h-11 rounded-8 bg-blue-800 px-4 text-std-16B-170 text-white",
+        "col-span-2 min-h-11 rounded-8 bg-blue-800 px-4 text-std-16B-170 text-white",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-blue",
         "disabled:opacity-60",
       )}
@@ -135,7 +137,7 @@ function StatusMessage({ state }: { state: ActionState }) {
       role="status"
       aria-live="polite"
       className={cn(
-        "min-h-6 text-std-14N-130",
+        "col-span-2 min-h-6 text-std-14N-130",
         state.kind === "error" ? "text-error-1" : "text-success-1",
       )}
     >
@@ -154,6 +156,7 @@ type FieldProps = {
   required?: boolean;
   unit?: string;
   error?: string[];
+  wide?: boolean;
 };
 
 function Field({
@@ -166,11 +169,12 @@ function Field({
   required,
   unit,
   error,
+  wide,
 }: FieldProps) {
   const id = useId();
   const errorId = `${id}-error`;
   return (
-    <div className="flex flex-col gap-1">
+    <div className={cn("flex flex-col gap-1", wide && "col-span-2")}>
       <label htmlFor={id} className="text-std-14B-130">
         {label}
         {required && <span className="ml-1 text-error-1" aria-hidden>*</span>}

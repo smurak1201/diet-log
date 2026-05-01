@@ -176,13 +176,6 @@ export default async function HomePage() {
           )}
         </section>
 
-        <section aria-labelledby="streak-heading">
-          <h2 id="streak-heading" className="sr-only">
-            継続状況
-          </h2>
-          <StreakCard streak={streak} />
-        </section>
-
         <section aria-labelledby="activity-heading">
           <h2 id="activity-heading" className="sr-only">
             運動

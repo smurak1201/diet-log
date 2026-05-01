@@ -72,6 +72,7 @@ const bodySchema = z.object({
     .regex(/^\d{4}-\d{2}-\d{2}$/, "日付の形式が不正です")
     .transform((v) => new Date(`${v}T00:00:00Z`)),
   weightKg: z.coerce.number().positive("体重は正の数値を入力してください"),
+  bmi: z.coerce.number().positive("BMI は正の数値を入力してください"),
   bodyFatPct: z.coerce.number().positive("体脂肪率は正の数値を入力してください"),
   muscleMassKg: z.coerce.number().positive("筋肉量は正の数値を入力してください"),
   visceralFat: z.coerce.number().positive("内臓脂肪は正の数値を入力してください"),
@@ -190,6 +191,7 @@ export async function upsertBodyComposition(
   const parsed = bodySchema.safeParse({
     date: formData.get("date"),
     weightKg: formData.get("weightKg"),
+    bmi: formData.get("bmi"),
     bodyFatPct: formData.get("bodyFatPct"),
     muscleMassKg: formData.get("muscleMassKg"),
     visceralFat: formData.get("visceralFat"),

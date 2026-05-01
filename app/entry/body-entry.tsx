@@ -102,6 +102,15 @@ export function BodyEntry() {
           error={fieldErrors.weightKg}
         />
         <Field
+          label="BMI"
+          name="bmi"
+          type="number"
+          step="0.1"
+          inputMode="decimal"
+          required
+          error={fieldErrors.bmi}
+        />
+        <Field
           label="体脂肪率"
           name="bodyFatPct"
           type="number"

@@ -47,6 +47,7 @@ export default async function BodyPage() {
                     deleteAction={deleteBodyComposition.bind(null, b.id)}
                   >
                     <Row label="体重" value={`${b.weightKg.toFixed(1)} kg`} />
+                    <Row label="BMI" value={b.bmi.toFixed(1)} />
                     <Row
                       label="体脂肪率"
                       value={`${b.bodyFatPct.toFixed(1)} %`}

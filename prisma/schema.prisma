@@ -59,6 +59,8 @@ model BodyComposition {
   date            DateTime @unique @db.Date
   /// 体重 (kg)
   weightKg        Float
+  /// BMI
+  bmi             Float
   /// 体脂肪率 (%)
   bodyFatPct      Float
   /// 筋肉量 (kg)

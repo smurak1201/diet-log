@@ -147,7 +147,7 @@ https://design.digital.go.jp/dads/foundations/
 - **マイグレーション**: スキーマ変更は `prisma migrate dev` で管理。`prisma/schema.prisma` を single source of truth とする
 - **型**: Prisma が生成する型 (`Prisma.UserCreateInput` 等) を活用し、独自に再定義しない
 - **DB 接続を扱うモジュール**には `import 'server-only'` を必ず入れて Client にバンドルされないようにする
-- **one-off スクリプト** (seed / バックフィル等) は [scripts/](scripts/) に置き、`node --env-file=.env scripts/xxx.ts` で実行する (`tsx` が devDependencies に入っているので TypeScript のまま実行可)
+- **one-off スクリプト** (seed / バックフィル等) は [scripts/](scripts/) に置き、`npx tsx --env-file=.env scripts/xxx.ts` で実行する (`tsx` が devDependencies に入っているので TypeScript のまま実行可)
 
 ## Gemini API (画像認識)
 - 呼び出しは [lib/gemini.ts](lib/gemini.ts) のラッパー経由のみ。**Server Action から呼ぶ** (`import 'server-only'` で Client 混入を防止)

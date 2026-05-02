@@ -22,6 +22,10 @@ export const metadata: Metadata = {
   title: "ダッシュボード | ダイエットログ",
 };
 
+// 「今日」を毎回計算する必要があるためビルド時プレレンダリングを無効化する
+// (静的生成のままだとビルド時刻で getJstToday() が固定され、経過日数が日付をまたいでも更新されない)
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const today = getJstToday();
 

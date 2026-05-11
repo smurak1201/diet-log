@@ -29,8 +29,12 @@ export type WorkoutSummary = {
 export type BodyDiff = {
   weightKg: number;
   bodyFatPct: number;
+  muscleMassKg: number;
   daysElapsed: number;
 };
+
+/// calcBodyDiff の入力。BodyLike にダイエット進捗で扱う筋肉量を加えたもの
+export type BodyDiffInput = BodyLike & { muscleMassKg: number };
 
 // ---- 日付ヘルパー ---------------------------------------------------------
 
@@ -93,7 +97,10 @@ export function summarizeWorkouts(
   return acc;
 }
 
-export function calcBodyDiff(initial: BodyLike, latest: BodyLike): BodyDiff {
+export function calcBodyDiff(
+  initial: BodyDiffInput,
+  latest: BodyDiffInput,
+): BodyDiff {
   const initialDay = startOfUtcDay(initial.date);
   const latestDay = startOfUtcDay(latest.date);
   const daysElapsed = Math.round(
@@ -102,6 +109,7 @@ export function calcBodyDiff(initial: BodyLike, latest: BodyLike): BodyDiff {
   return {
     weightKg: latest.weightKg - initial.weightKg,
     bodyFatPct: latest.bodyFatPct - initial.bodyFatPct,
+    muscleMassKg: latest.muscleMassKg - initial.muscleMassKg,
     daysElapsed,
   };
 }

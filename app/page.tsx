@@ -52,10 +52,10 @@ export default async function HomePage() {
   // 開始日が登録済みなら、開始日以降の最初の体組成と最新の体組成を取得
   let startDate: Date | null = null;
   let initialBody:
-    | { date: Date; weightKg: number; bodyFatPct: number }
+    | { date: Date; weightKg: number; bodyFatPct: number; muscleMassKg: number }
     | null = null;
   let latestBody:
-    | { date: Date; weightKg: number; bodyFatPct: number }
+    | { date: Date; weightKg: number; bodyFatPct: number; muscleMassKg: number }
     | null = null;
 
   if (settingResult.ok && settingResult.data) {

@@ -386,3 +386,31 @@ export function getMetrics(
       : null;
   return { ...summary, avgPaceSecPerKm };
 }
+
+export type BodyRangeMetrics = {
+  count: number;
+  /// 期間内の最古計測 (基準値)。計測 1 件以下のとき null
+  initial: BodyDiffInput | null;
+  /// 期間内の最新計測。計測 0 件のとき null
+  latest: BodyDiffInput | null;
+  /// initial → latest の差分。2 件未満で差分が出せないとき null
+  diff: BodyDiff | null;
+};
+
+/// 体組成は状態値なので合計せず「期間内の変化量」を集計する。
+/// 期間の最初と最後の計測を基準値・最新値として返し、その差分も calcBodyDiff で出す
+export function getBodyMetrics(
+  rows: BodyDiffInput[],
+  range: RangeContext,
+): BodyRangeMetrics {
+  const sorted = rows
+    .filter((r) => r.date >= range.from && r.date < range.to)
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
+  const count = sorted.length;
+  if (count === 0) return { count, initial: null, latest: null, diff: null };
+  const latest = sorted[count - 1];
+  // 計測 1 件のときは変化を出せないので基準値・差分なしで最新値のみ返す
+  if (count === 1) return { count, initial: null, latest, diff: null };
+  const initial = sorted[0];
+  return { count, initial, latest, diff: calcBodyDiff(initial, latest) };
+}

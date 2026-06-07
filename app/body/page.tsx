@@ -1,13 +1,19 @@
 import type { Metadata } from "next";
+import {
+  BodySection,
+  type BodyListItem,
+} from "@/components/body/body-section";
 import { PageHeader } from "@/components/page-header";
-import { EmptyState, RecordCard, Row } from "@/components/record-card";
 import { prisma, safeDb } from "@/lib/db";
-import { formatDate } from "@/lib/format";
-import { deleteBodyComposition } from "./actions";
+import { formatIsoDate, getJstToday } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "体組成 | ダイエットログ",
 };
+
+// 「今日」を毎回計算する必要があるためビルド時プレレンダリングを無効化する
+// (静的生成のままだとビルド時刻で getJstToday() が固定され、todayIso が日付をまたいでも更新されない)
+export const dynamic = "force-dynamic";
 
 export default async function BodyPage() {
   const result = await safeDb(
@@ -18,13 +24,31 @@ export default async function BodyPage() {
     "bodyComposition.findMany",
   );
 
+  const today = getJstToday();
+  const todayIso = formatIsoDate(today);
+
+  const bodies = result.ok ? result.data : [];
+  const items: BodyListItem[] = bodies.map((b) => ({
+    id: b.id,
+    date: b.date.toISOString(),
+    weightKg: b.weightKg,
+    bmi: b.bmi,
+    bodyFatPct: b.bodyFatPct,
+    muscleMassKg: b.muscleMassKg,
+    visceralFat: b.visceralFat,
+    basalMetabolism: b.basalMetabolism,
+  }));
+  // findMany は desc 取得なので最古は末尾
+  const oldestIso =
+    bodies.length > 0 ? bodies[bodies.length - 1].date.toISOString() : null;
+
   return (
     <>
       <PageHeader title="体組成" />
 
       <main
         id="main"
-        className="mx-auto w-full max-w-screen-sm flex-1 px-4 py-6"
+        className="mx-auto flex w-full max-w-screen-sm flex-1 flex-col gap-6 px-4 py-6"
       >
         {!result.ok ? (
           <p
@@ -33,39 +57,12 @@ export default async function BodyPage() {
           >
             データの取得に失敗しました。時間をおいて再読込してください。
           </p>
-        ) : result.data.length === 0 ? (
-          <EmptyState message="体組成記録がまだありません" />
         ) : (
-          <ul className="flex flex-col gap-3">
-            {result.data.map((b) => {
-              const dateLabel = formatDate(b.date);
-              return (
-                <li key={b.id}>
-                  <RecordCard
-                    title={dateLabel}
-                    deleteLabel={`${dateLabel} の体組成記録`}
-                    deleteAction={deleteBodyComposition.bind(null, b.id)}
-                  >
-                    <Row label="体重" value={`${b.weightKg.toFixed(1)} kg`} />
-                    <Row label="BMI" value={b.bmi.toFixed(1)} />
-                    <Row
-                      label="体脂肪率"
-                      value={`${b.bodyFatPct.toFixed(1)} %`}
-                    />
-                    <Row
-                      label="筋肉量"
-                      value={`${b.muscleMassKg.toFixed(1)} kg`}
-                    />
-                    <Row label="内臓脂肪" value={b.visceralFat.toFixed(1)} />
-                    <Row
-                      label="基礎代謝"
-                      value={`${b.basalMetabolism} kcal`}
-                    />
-                  </RecordCard>
-                </li>
-              );
-            })}
-          </ul>
+          <BodySection
+            bodies={items}
+            todayIso={todayIso}
+            oldestIso={oldestIso}
+          />
         )}
       </main>
     </>

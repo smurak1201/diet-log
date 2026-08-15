@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Noto_Sans_JP } from "next/font/google";
 import { BottomTabNav } from "@/components/bottom-tab-nav";
+import { MaterialSymbolsFont } from "@/components/material-symbols-font";
 import { Toaster } from "@/components/toaster";
 import { cn } from "@/lib/cn";
 import "./globals.css";
@@ -41,11 +42,6 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        {/* eslint-disable-next-line @next/next/no-page-custom-font -- Material Symbols is an icon font (not supported by next/font); this is the root layout so the link is global, not per-page. */}
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap"
-        />
       </head>
       <body
         className={cn(
@@ -54,6 +50,7 @@ export default function RootLayout({
           "pb-[calc(4rem+env(safe-area-inset-bottom))]",
         )}
       >
+        <MaterialSymbolsFont />
         {/* スキップリンク: キーボード操作時に最初の Tab で画面左上に出現し、ヘッダー/タブバーを飛ばして本文へ移動できる (WCAG 2.2 / JIS X 8341-3 対応)。普段は sr-only で非表示、フォーカス時のみ表示。 */}
         <a
           href="#main"
